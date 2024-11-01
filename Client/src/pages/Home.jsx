@@ -1,12 +1,9 @@
 import React from "react";
 import Builder from "./Builder";
+import Projects from "./Projects";
 
 const Home = () => {
-  return (
-    <div>
-      <Builder />
-    </div>
-  );
+  return <Projects />;
 };
 
 export default Home;

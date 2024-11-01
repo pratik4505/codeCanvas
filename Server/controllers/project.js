@@ -1,0 +1,162 @@
+const Commit = require("../models/Commit");
+const Project = require("../models/Project");
+const User = require("../models/User");
+
+const defaultCommitContent = JSON.stringify({
+  ROOT: {
+    type: { resolvedName: "Container" },
+    isCanvas: true,
+    props: { id: "root" },
+    displayName: "Container",
+    custom: {},
+    hidden: false,
+    nodes: [],
+    linkedNodes: {},
+  },
+});
+
+const commit = async (req, res) => {
+  const { page, projectId, commit, message } = req.body;
+
+  try {
+    const { projectId, page, commit, commitMessage } = req.body;
+
+    // Create and save the new commit
+    const newCommit = new Commit({
+      projectId,
+      commit,
+      page,
+      commitMessage,
+    });
+    const savedCommit = await newCommit.save();
+
+    // Find the project and update the specific page with the new commit details
+    await Project.findByIdAndUpdate(projectId, {
+      $push: {
+        [`pages.${page}`]: {
+          commitId: savedCommit._id,
+          commitMessage,
+          date: new Date(), // Add the current date here
+        },
+      },
+    });
+
+    res
+      .status(200)
+      .json({ message: "Commit saved and project updated successfully" });
+  } catch (error) {
+    console.error("Error saving commit:", error);
+    res.status(500).json({ error: "Internal server error" });
+  }
+};
+
+const userProjects = async (req, res) => {
+  const { userId } = req;
+
+  try {
+    // Find projects where the userId is a key in the collaborators map
+    const projects = await Project.find({
+      [`collaborators.${userId}`]: { $exists: true },
+    });
+
+    res.status(200).json(projects);
+  } catch (error) {
+    console.error("Error fetching projects:", error);
+    res.status(500).json({ error: "Internal server error" });
+  }
+};
+
+const addCollaborator = async (req, res) => {
+  const { projectId, userName } = req.body;
+
+  if (!projectId || !userName) {
+    return res
+      .status(400)
+      .json({ message: "Project ID and username are required." });
+  }
+
+  try {
+    // Find the user by username
+    const user = await User.findOne({ name: userName });
+    if (!user) {
+      return res.status(404).json({ message: "User not found." });
+    }
+
+    const collaboratorId = user._id; // Get the ID from the user document
+
+    // Find the project by ID
+    const project = await Project.findById(projectId);
+    if (!project) {
+      return res.status(404).json({ message: "Project not found." });
+    }
+
+    // Check if the collaborator already exists
+    if (project.collaborators.has(collaboratorId.toString())) {
+      return res.status(200).json({ id: collaboratorId, name: userName });
+    }
+
+    // Add the new collaborator to the project using Map.set()
+    project.collaborators.set(collaboratorId.toString(), userName);
+
+    // Save the updated project
+    await project.save();
+
+    // Return the collaborator's ID and name
+    res.status(200).json({ id: collaboratorId, name: userName });
+  } catch (error) {
+    console.error("Error adding collaborator:", error);
+    res.status(500).json({ message: "Failed to add collaborator" });
+  }
+};
+
+const createProject = async (req, res) => {
+  const userId = req.userId;
+  const userName = req.name;
+  const { name } = req.body;
+  if (!userId || !name) {
+    return res
+      .status(400)
+      .json({ message: "User ID and project name are required." });
+  }
+
+  try {
+    // Step 1: Create the project with the given name and initial collaborator
+    const newProject = new Project({
+      name,
+      collaborators: { [userId]: userName },
+      pages: new Map(),
+    });
+
+    const initialCommit = new Commit({
+      projectId: newProject._id,
+      commit: defaultCommitContent,
+      page: "index",
+    });
+
+    await initialCommit.save();
+
+    // Step 3: Link the commit to the project pages
+    newProject.pages.set("index", [
+      {
+        commitId: initialCommit._id,
+        commitMessage: "initial commit",
+        date: new Date(),
+      },
+    ]);
+
+    // Save the new project
+    await newProject.save();
+
+    res.status(201).json(newProject);
+  } catch (error) {
+    console.error("Error creating project:", error);
+    res.status(500).json({ message: "Failed to create project" });
+  }
+};
+
+module.exports = {
+  commit,
+  userProjects,
+  addCollaborator,
+  createProject,
+};

@@ -45,27 +45,18 @@ const login = async (req, res, next) => {
 
     const token = jwt.sign(
       {
-        emailId: loadedUser.emailId,
         userId: loadedUser._id.toString(),
+        name: loadedUser.name,
       },
       process.env.ACCESS_TOKEN_SECRET
     );
-
-    var isDlVerified = false;
-
-    if (loadedUser.dlNumber && loadedUser.dob) {
-      isDlVerified = true;
-    }
 
     res.status(200).json({
       data: {
         accessToken: token,
         userId: loadedUser._id.toString(),
-        emailId: loadedUser.emailId,
         name: loadedUser.name,
-        imageUrl: loadedUser.imageUrl,
       },
-      isDlVerified,
     });
   } catch (err) {
     // Handle other errors
@@ -77,7 +68,7 @@ const login = async (req, res, next) => {
 const signUp = async (req, res, next) => {
   const errors = validationResult(req);
 
-  const { userName, email, password, otp, otpId } = req.body;
+  const { email, password, otp, otpId } = req.body;
 
   try {
     // Check for validation errors
@@ -102,6 +93,14 @@ const signUp = async (req, res, next) => {
       return res.status(400).json({ message: "Invalid OTP" });
     }
 
+    // Extract userName from email
+    const emailParts = email.toLowerCase().split("@");
+    const userNameBase = emailParts[0]; // Part before '@'
+    const mailServer = emailParts[1].split(".")[0]; // Part after '@' and before '.'
+
+    // Generate userName
+    let userName = `${userNameBase}_${mailServer}`;
+
     // Hash the password
     const hashedPassword = await bcrypt.hash(password, 10);
 
@@ -109,7 +108,7 @@ const signUp = async (req, res, next) => {
     const newUser = new User({
       emailId: email.toLowerCase(),
       password: hashedPassword,
-      name: userName,
+      name: userName, // Set the derived userName
     });
 
     // Save the user to the database

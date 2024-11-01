@@ -23,7 +23,7 @@ const LeftPanel = () => {
   const { connectors } = useEditor();
 
   return (
-    <div className="w-1/5 bg-gray-200 p-4 overflow-y-auto">
+    <div className="bg-gray-200 p-4 overflow-y-auto" style={{ width: "10%" }}>
       <h2 className="text-xl font-bold mb-4">Components</h2>
 
       <ToolboxButton
