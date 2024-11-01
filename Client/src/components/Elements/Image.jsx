@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState } from "react";
 import { useNode } from "@craftjs/core";
 import { TextInput } from "../utils/TextInput";
 import { Label } from "../utils/Label";
@@ -38,9 +38,17 @@ const ImageSettings = () => {
     height: node.data.props.height,
   }));
 
+  const handleFileChange = (e) => {
+    const file = e.target.files[0];
+    if (file) {
+      const imageUrl = URL.createObjectURL(file);
+      setProp((props) => (props.src = imageUrl), 1000);
+    }
+  };
+
   return (
     <>
-      <Label label="Source">
+      <Label label="Image Source URL">
         <TextInput
           type="text"
           defaultValue={src}
@@ -49,7 +57,10 @@ const ImageSettings = () => {
           }}
         />
       </Label>
-      <Label label="Alt">
+      <Label label="Upload from Computer">
+        <input type="file" accept="image/*" onChange={handleFileChange} />
+      </Label>
+      <Label label="Alt Text">
         <TextInput
           type="text"
           defaultValue={alt}

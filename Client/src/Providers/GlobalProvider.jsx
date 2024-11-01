@@ -22,6 +22,8 @@ export const GlobalProvider = ({ children }) => {
   const listen = useCallback(() => {}, [socket]);
 
   const initialLoad = useCallback(async () => {
+    console.log("Base URL:", baseUrl);
+
     const data = JSON.parse(localStorage.getItem("profile"));
     if (data) {
       const userId = data.userId;
