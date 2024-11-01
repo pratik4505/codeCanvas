@@ -52,12 +52,12 @@ const LeftPanel = () => {
         }
         icon={LinkIcon}
         text="Link"
-      />
+      /> */}
       <ToolboxButton
         ref={(ref) => connectors.create(ref, <Image />)}
         //icon={PhotographIcon}
         text="Image"
-      /> */}
+      />
       <ToolboxButton
         ref={(ref) => connectors.create(ref, <Element is={Container} canvas />)}
         //icon={TemplateIcon}
