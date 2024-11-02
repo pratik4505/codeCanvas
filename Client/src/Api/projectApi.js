@@ -49,3 +49,13 @@ export const fetchCommit = async (commitId) => {
     return handleApiError(error);
   }
 };
+
+export const addPage = async (data) => {
+  try {
+    const res = await API.post("/project/addPage", data);
+    if (res.status === 201) return { error: null, data: res.data };
+    else return { error: res.data.error, data: null };
+  } catch (error) {
+    return handleApiError(error);
+  }
+};

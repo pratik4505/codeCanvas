@@ -1,11 +1,13 @@
 import React, { useState } from "react";
 import AddCollaborator from "../components/Project/AddCollaborator";
 import PageCommitsDialog from "../components/Project/PageCommitsDialog";
+import AddPageDialog from "../components/Project/AddPageDialog"; // Import the new dialog component
 
 const Project = ({ project, goBack }) => {
   const [showDialog, setShowDialog] = useState(false);
   const [showCommitsDialog, setShowCommitsDialog] = useState(null);
   const [selectedCommits, setSelectedCommits] = useState([]);
+  const [showAddPageDialog, setShowAddPageDialog] = useState(false); // State for the add page dialog
 
   // Handle opening the dialog with commits of the clicked page
   const openCommitsDialog = (pageName) => {
@@ -14,6 +16,12 @@ const Project = ({ project, goBack }) => {
       commits.sort((a, b) => new Date(b.date) - new Date(a.date))
     ); // Sort commits by date (newest first)
     setShowCommitsDialog(pageName);
+  };
+
+  // Function to handle adding a new page
+  const handlePageAdded = (newPage) => {
+    // Update the project with the new page here if necessary
+    project.pages[newPage.name] = [newPage.value]; // Initialize with an empty array of commits
   };
 
   return (
@@ -49,6 +57,14 @@ const Project = ({ project, goBack }) => {
         </ul>
       </div>
 
+      {/* Add Page Button */}
+      <button
+        onClick={() => setShowAddPageDialog(true)}
+        className="bg-yellow-500 text-white px-4 py-2 rounded mt-4 hover:bg-yellow-600 transition"
+      >
+        Add Page
+      </button>
+
       {/* Add Collaborator Button */}
       <button
         onClick={() => setShowDialog(true)}
@@ -69,6 +85,16 @@ const Project = ({ project, goBack }) => {
           onClose={() => setShowCommitsDialog(false)}
           projectId={project._id}
           page={showCommitsDialog}
+        />
+      )}
+
+      {/* Dialog for adding a new page */}
+      {showAddPageDialog && (
+        <AddPageDialog
+          setShowDialog={setShowAddPageDialog}
+          projectId={project._id}
+          onPageAdded={handlePageAdded}
+          project={project}
         />
       )}
     </div>

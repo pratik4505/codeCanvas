@@ -153,10 +153,58 @@ const fetchCommit = async (req, res) => {
   }
 };
 
+const addPage = async (req, res) => {
+  const { projectId, pageName } = req.body;
+
+  if (!projectId || !pageName) {
+    return res
+      .status(400)
+      .json({ message: "Project ID and page name are required." });
+  }
+
+  try {
+    // Find the project
+    const project = await Project.findById(projectId);
+    if (!project) {
+      return res.status(404).json({ message: "Project not found." });
+    }
+
+    // Check if the page name already exists
+    if (project.pages[pageName]) {
+      return res.status(400).json({ message: "Page name already exists." });
+    }
+
+    // Create a new commit
+    const newCommit = new Commit({
+      projectId: project._id,
+      commit: defaultCommitContent, // Store the commit message
+      page: pageName,
+    });
+
+    await newCommit.save();
+
+    const value = {
+      commitId: newCommit._id,
+      commitMessage: "initial commit",
+      date: new Date(),
+    };
+
+    project.pages.set(pageName, [value]);
+
+    await project.save();
+
+    res.status(201).json({ name: pageName, value: value }); // Return the new page and commit
+  } catch (error) {
+    console.error("Error adding page:", error);
+    res.status(500).json({ message: "Failed to add page." });
+  }
+};
+
 module.exports = {
   commit,
   userProjects,
   addCollaborator,
   createProject,
   fetchCommit,
+  addPage,
 };

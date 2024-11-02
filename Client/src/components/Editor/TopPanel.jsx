@@ -19,7 +19,7 @@ const TopPanel = () => {
   console.log(projectId, page);
   const handleCommit = async () => {
     const editorJson = query.serialize();
-    console.log(editorJson);
+
     try {
       const response = await commit({
         projectId,
