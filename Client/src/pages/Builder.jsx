@@ -9,9 +9,10 @@ import { Text } from "../components/Elements/Text";
 import { Container } from "../components/Elements/Container";
 import { Button } from "../components/Elements/Button";
 import { Image } from "../components/Elements";
+import { Footer } from "../components/Premade/Footer";
 const Builder = () => {
   return (
-    <Editor resolver={{ Container, Text, Button, Image }}>
+    <Editor resolver={{ Container, Text, Button, Image, Footer }}>
       <div className="h-screen flex">
         {/* Left Panel */}
         <LeftPanel />

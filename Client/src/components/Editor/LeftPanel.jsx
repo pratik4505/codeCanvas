@@ -10,6 +10,8 @@ import {
   Rows,
   Text,
 } from "../Elements";
+import { Footer } from "../Premade/Footer";
+import CodeGenerator from "./CodeGenerator";
 const ToolboxButton = React.forwardRef(({ icon, text }, ref) => (
   <div
     className="flex flex-col rounded items-center p-2 mb-2 bg-white border border-zinc-200 hover:cursor-move"
@@ -24,6 +26,7 @@ const LeftPanel = () => {
 
   return (
     <div className="w-1/5 bg-gray-200 p-4 overflow-y-auto">
+      <CodeGenerator/>
       <h2 className="text-xl font-bold mb-4">Components</h2>
 
       <ToolboxButton
@@ -35,6 +38,11 @@ const LeftPanel = () => {
         ref={(ref) => connectors.create(ref, <Button text="New button" />)}
         //icon={CursorClickIcon}
         text="Button"
+      />
+      <ToolboxButton
+        ref={(ref) => connectors.create(ref, <Footer text="New footer" />)}
+        //icon={CursorClickIcon}
+        text="Footer"
       />
 
       {/* <ToolboxButton
