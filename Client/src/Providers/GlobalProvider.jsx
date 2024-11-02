@@ -53,13 +53,13 @@ export const GlobalProvider = ({ children }) => {
   useEffect(() => {
     // Function to send a ping to the server
 
-    socket.on("connect", () => {
-      console.log("Socket.IO connected");
-    });
+    // socket.on("connect", () => {
+    //   console.log("Socket.IO connected");
+    // });
 
-    socket.on("connect_error", (error) => {
-      console.error("Socket.IO connection error:", error);
-    });
+    // socket.on("connect_error", (error) => {
+    //   console.error("Socket.IO connection error:", error);
+    // });
 
     initialLoad();
     return () => {

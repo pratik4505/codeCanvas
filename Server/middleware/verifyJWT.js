@@ -9,7 +9,7 @@ const verifyJWT = (req, res, next) => {
   if (!authHeader || !authHeader.startsWith("Bearer ")) {
     return res.status(401).json({ message: "Unauthorized" });
   }
-  
+
   // Extract token from authorization header
   const token = authHeader.split(" ")[1];
 
@@ -22,6 +22,7 @@ const verifyJWT = (req, res, next) => {
 
     // Store decoded user ID in request object for use in subsequent middleware or routes
     req.userId = decodedToken.userId;
+    req.name = decodedToken.name;
 
     // Call next middleware or route handler
     next();
