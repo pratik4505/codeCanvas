@@ -2,31 +2,17 @@ const Commit = require("../models/Commit");
 const Project = require("../models/Project");
 const User = require("../models/User");
 
-const defaultCommitContent = JSON.stringify({
-  ROOT: {
-    type: { resolvedName: "Container" },
-    isCanvas: true,
-    props: { id: "root" },
-    displayName: "Container",
-    custom: {},
-    hidden: false,
-    nodes: [],
-    linkedNodes: {},
-  },
-});
+const defaultCommitContent = `{"ROOT":{"type":"div","isCanvas":true,"props":{"id":"root","className":"w-full h-full"},"displayName":"div","custom":{},"hidden":false,"nodes":[],"linkedNodes":{}}}`;
 
 const commit = async (req, res) => {
   const { page, projectId, commit, message } = req.body;
-
+  console.log(req.body);
   try {
-    const { projectId, page, commit, commitMessage } = req.body;
-
     // Create and save the new commit
     const newCommit = new Commit({
       projectId,
       commit,
       page,
-      commitMessage,
     });
     const savedCommit = await newCommit.save();
 
@@ -35,7 +21,7 @@ const commit = async (req, res) => {
       $push: {
         [`pages.${page}`]: {
           commitId: savedCommit._id,
-          commitMessage,
+          commitMessage: message,
           date: new Date(), // Add the current date here
         },
       },
@@ -154,9 +140,23 @@ const createProject = async (req, res) => {
   }
 };
 
+const fetchCommit = async (req, res) => {
+  try {
+    const commit = await Commit.findById(req.params.commitId);
+    if (!commit) {
+      return res.status(404).json({ message: "Commit not found" });
+    }
+    res.status(200).json(commit);
+  } catch (error) {
+    console.error("Error fetching commit:", error);
+    res.status(500).json({ message: "Server error" });
+  }
+};
+
 module.exports = {
   commit,
   userProjects,
   addCollaborator,
   createProject,
+  fetchCommit,
 };

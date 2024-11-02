@@ -1,28 +1,34 @@
 import React, { useState } from "react";
 import { useEditor } from "@craftjs/core";
-import { useParams } from "react-router-dom";
-import axios from "axios";
+import { useLocation } from "react-router-dom";
+import { commit } from "../../Api/projectApi";
 
 const TopPanel = () => {
-  const { projectId, page } = useParams(); // Extract projectId and page from URL params
+  const location = useLocation();
+  const que = new URLSearchParams(location.search);
+  const projectId = que.get("projectId");
+  const commitId = que.get("commitId");
+  const page = que.get("page");
+
   const { actions, canUndo, canRedo, query } = useEditor((_, query) => ({
     canUndo: query.history.canUndo(),
     canRedo: query.history.canRedo(),
   }));
 
   const [commitMessage, setCommitMessage] = useState("");
-
+  console.log(projectId, page);
   const handleCommit = async () => {
     const editorJson = query.serialize();
-
+    console.log(editorJson);
     try {
-      await axios.post("/project/commit", {
+      const response = await commit({
         projectId,
         page,
         commit: editorJson,
         message: commitMessage,
       });
-      alert("Commit successful!");
+      if (!response.error) alert("Commit successful!");
+      else alert("Commit Failed!");
     } catch (error) {
       console.error("Error committing changes:", error);
       alert("Failed to commit changes.");

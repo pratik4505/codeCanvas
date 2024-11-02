@@ -6,6 +6,8 @@ import ForgotPassword from "../Auth/ForgotPassword";
 import Error from "../Error/Error";
 import SignUp from "../Auth/SignUp";
 import Home from "../../pages/Home";
+import Projects from "../../pages/Projects";
+import Builder from "../../pages/Builder";
 
 const AppRoutes = () => {
   return (
@@ -18,6 +20,8 @@ const AppRoutes = () => {
 
       <Route path="/" element={<ProtectedRoute />}>
         <Route index element={<Home />} />
+        <Route path="/projects" element={<Projects />} />
+        <Route path="/builder" element={<Builder />} />
       </Route>
     </Routes>
   );

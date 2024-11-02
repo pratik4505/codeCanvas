@@ -29,3 +29,23 @@ export const createProject = async (data) => {
     return handleApiError(error);
   }
 };
+
+export const commit = async (data) => {
+  try {
+    const res = await API.post("/project/commit", data);
+    if (res.status === 200) return { error: null, data: res.data };
+    else return { error: res.data.error, data: null };
+  } catch (error) {
+    return handleApiError(error);
+  }
+};
+
+export const fetchCommit = async (commitId) => {
+  try {
+    const res = await API.get(`/project/fetchCommit/${commitId}`);
+    if (res.status === 200) return { error: null, data: res.data };
+    else return { error: res.data.error, data: null };
+  } catch (error) {
+    return handleApiError(error);
+  }
+};
