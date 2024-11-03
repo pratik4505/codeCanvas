@@ -95,14 +95,14 @@ export default function SignUp() {
             />
             <label>Password</label>
           </div>
-          <a onClick={handleSignUp}>
+          <a onClick={handleSignUp} style={{ cursor: "pointer" }}>
             <span></span>
             <span></span>
             <span></span>
             <span></span>
             <div>{loading ? <div>Loading...</div> : <div>Sign Up</div>}</div>
           </a>
-          <a onClick={sendotp}>
+          <a onClick={sendotp} style={{ cursor: "pointer" }}>
             <span></span>
             <span></span>
             <span></span>

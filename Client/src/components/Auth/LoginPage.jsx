@@ -71,7 +71,7 @@ export default function LoginPage() {
             <label>Password</label>
           </div>
           <div className="flex justify-between">
-            <a className="cursor-pointer" onClick={handleLogin}>
+            <a className="cursor-pointer" style={{ cursor: "pointer" }} onClick={handleLogin}>
               <span></span>
               <span></span>
               <span></span>
@@ -84,7 +84,7 @@ export default function LoginPage() {
                 )}
               </div>
             </a>
-            <a className="cursor-pointer" onClick={() => navigate("/register")}>
+            <a className="cursor-pointer" style={{ cursor: "pointer" }} onClick={() => navigate("/register")}>
               <span></span>
               <span></span>
               <span></span>
@@ -99,7 +99,7 @@ export default function LoginPage() {
             </a>
           </div>
 
-          <Link to="/forgotPassword">Forgot Password</Link>
+          <Link to="/forgotPassword" style={{ cursor: "pointer" }}>Forgot Password</Link>
         </form>
       </div>
     </div>

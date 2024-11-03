@@ -88,10 +88,12 @@ const signUp = async (req, res, next) => {
       return res.status(400).json({ message: "Invalid OTP" });
     }
 
+
     // Compare email and OTP
     if (emailModel.email !== email || emailModel.verificationCode !== otp) {
       return res.status(400).json({ message: "Invalid OTP" });
     }
+
 
     // Extract userName from email
     const emailParts = email.toLowerCase().split("@");
@@ -113,6 +115,7 @@ const signUp = async (req, res, next) => {
 
     // Save the user to the database
     const savedUser = await newUser.save();
+    console.log("I come here");
 
     res.status(201).json({ message: "User created!", userId: savedUser._id });
   } catch (err) {

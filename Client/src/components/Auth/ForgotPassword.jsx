@@ -87,14 +87,14 @@ export default function ForgotPassword() {
             />
             <label>Password</label>
           </div>
-          <a onClick={handleChangePassword} disabled={loading}>
+          <a onClick={handleChangePassword} style={{ cursor: "pointer" }} disabled={loading}>
             <span></span>
             <span></span>
             <span></span>
             <span></span>
             <div>{loading ? "Loading..." : "Change Password"}</div>
           </a>
-          <a onClick={sendOTP} disabled={loading}>
+          <a onClick={sendOTP} style={{ cursor: "pointer" }} disabled={loading}>
             <span></span>
             <span></span>
             <span></span>

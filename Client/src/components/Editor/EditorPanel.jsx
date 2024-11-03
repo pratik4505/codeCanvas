@@ -3,6 +3,7 @@ import { Frame, Element, useEditor } from "@craftjs/core";
 import TopPanel from "./TopPanel";
 import { useLocation } from "react-router-dom";
 import { fetchCommit } from "../../Api/projectApi";
+import { JsxOutput } from "./JsxOutput";
 
 const EditorPanel = () => {
   const location = useLocation();
@@ -47,6 +48,7 @@ const EditorPanel = () => {
           </Element>
         </Frame>
       </div>
+      <JsxOutput/>
     </div>
   );
 };
