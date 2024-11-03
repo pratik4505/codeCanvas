@@ -1,6 +1,5 @@
 import { useState, useEffect } from "react";
 import { useEditor } from "@craftjs/core";
-// import { RefreshIcon } from "@heroicons/react/outline";
 import { Panel } from "./Panel";
 
 const __transformChildren = (children, getNode, level, formatted) => {
@@ -56,10 +55,7 @@ const __prettyOutput = (name, getNode, level, children, props) => {
           <br />
           {__transformChildren(children, getNode, level + 1, true).map(
             (child) => (
-              <>
-                {child}
-                <br />
-              </>
+              <span key={child}>{child}<br /></span>
             )
           )}
           {tabs}
@@ -82,11 +78,11 @@ const transformToJSX = (node, getNode, level = 1, formatted) => {
   const props = Object.keys(node.data.props).map((prop) =>
     prop !== "children" ? (
       formatted ? (
-        <>
+        <span key={prop}>
           <span className="text-red-400">{prop}</span>
           <span>=</span>
           <span className="text-lime-600">"{node.data.props[prop]}"</span>
-        </>
+        </span>
       ) : (
         `${prop}="${node.data.props[prop]}"`
       )
@@ -121,15 +117,22 @@ export const JsxOutput = () => {
     setOutput(query.serialize());
   };
 
+  const copyToClipboard = (content) => {
+    navigator.clipboard.writeText(content).then(
+      () => alert("Copied to clipboard!"),
+      (err) => console.error("Could not copy text:", err)
+    );
+  };
+
   useEffect(() => generateCode(), [formatted]);
 
   return (
     <Panel>
-      <div className="flex justify-between">
+      <div className="flex justify-between items-center">
         <h2 className="font-bold text-xl">JSX Preview</h2>
-        <div>
+        <div className="flex space-x-2">
           <button
-            className={`px-4 py-2 ${
+            className={`px-4 py-1 ${
               formatted
                 ? "bg-purple-600 text-white"
                 : "bg-gray-100 text-gray-900"
@@ -138,19 +141,33 @@ export const JsxOutput = () => {
           >
             {formatted ? "Pretty" : "Raw"}
           </button>
+          <button
+            className="px-4 py-1 bg-amber-500 text-white border rounded shadow-md"
+            onClick={generateCode}
+          >
+            Refresh
+          </button>
         </div>
+      </div>
+      <div className="mt-1 p-4 border rounded bg-white h-[20vh] overflow-auto relative">
+        <pre>{transformToJSX(rootNode, query.node, true, formatted)}</pre>
         <button
-          className="px-4 py-2 bg-amber-500 text-white border rounded shadow-md"
-          onClick={generateCode}
+          onClick={() =>
+            copyToClipboard(transformToJSX(rootNode, query.node, true, formatted))
+          }
+          className="absolute top-2 right-2 px-2 py-1 text-xs bg-blue-500 text-white rounded shadow"
         >
-          {/* <RefreshIcon className="w-5" /> */}
+          Copy
         </button>
       </div>
-      <div className="mt-4 p-4 border rounded bg-white">
-        <pre>{transformToJSX(rootNode, query.node, true, formatted)}</pre>
-      </div>
-      <div className="mt-4 p-4 border rounded bg-gray-200 text-gray-400">
-        {output}
+      <div className="mt-1 p-4 border rounded bg-gray-200 text-gray-400 h-[10vh] overflow-auto relative">
+        <pre>{output}</pre>
+        <button
+          onClick={() => copyToClipboard(output)}
+          className="absolute top-2 right-2 px-2 py-1 text-xs bg-blue-500 text-white rounded shadow"
+        >
+          Copy
+        </button>
       </div>
     </Panel>
   );

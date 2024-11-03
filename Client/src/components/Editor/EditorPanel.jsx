@@ -34,21 +34,28 @@ const EditorPanel = () => {
 
   return (
     <div
-      className="bg-white p-4 border-l border-r border-gray-300 flex flex-col pt-1"
-      style={{ width: "75%" }}
+      className="bg-white p-4 border-l border-r border-gray-300 flex flex-col h-full"
+      style={{ width: "60%" }}
     >
-      {/* Ensure TopPanel stays at the top */}
-      <TopPanel className="flex-none" />
+      {/* Top Panel at the top */}
+      <TopPanel className="flex-none border-b border-gray-200 mb-2 pb-2" />
 
-      {/* Frame content grows to fill remaining space */}
-      <div className="flex-grow flex justify-center items-center">
+      {/* Scrollable Frame container */}
+      <div className="flex-grow overflow-auto border border-gray-200 rounded-lg shadow-md">
         <Frame>
-          <Element is="div" id="root" canvas className="w-full h-full">
-            {/* The content from the commit will be loaded into this frame */}
+          <Element
+            is="div"
+            id="root"
+            canvas
+            className="w-full h-full min-h-screen bg-gray-50 p-4 rounded-lg"
+          >
+            {/* Content will load here */}
           </Element>
         </Frame>
       </div>
-      <JsxOutput/>
+
+      {/* JSX Output */}
+      <JsxOutput className="mt-4" />
     </div>
   );
 };
