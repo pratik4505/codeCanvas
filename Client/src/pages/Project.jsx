@@ -25,80 +25,90 @@ const Project = ({ project, goBack }) => {
   };
 
   return (
-    <div className="p-4">
-      <button
-        onClick={goBack}
-        className="bg-gray-500 text-white px-4 py-2 rounded mb-4 hover:bg-gray-600 transition"
-      >
-        Back to Projects
-      </button>
-      <h2 className="text-2xl font-bold mb-4">{project.name}</h2>
-
-      {/* Collaborators Section */}
-      <div className="mt-4">
-        <h3 className="font-semibold">Collaborators:</h3>
-        <p>{Object.values(project.collaborators).join(", ")}</p>
+    <div className="min-h-screen bg-gradient-to-b from-indigo-500 via-purple-600 to-pink-600 flex items-center justify-center">
+      <div className="p-6 max-w-3xl mx-auto bg-white rounded-xl shadow-2xl">
+        {/* Back to Projects Button */}
+        <button
+          onClick={goBack}
+          className="bg-gradient-to-r from-gray-600 to-gray-800 text-white px-6 py-3 rounded-lg mb-6 w-full hover:from-gray-700 hover:to-gray-900 transition-all duration-300 transform hover:scale-105"
+        >
+          Back to Projects
+        </button>
+  
+        {/* Project Name */}
+        <h2 className="text-3xl font-extrabold text-center text-gray-800 mb-6">
+          {project.name}
+        </h2>
+  
+        {/* Collaborators Section */}
+        <div className="mt-6 bg-white p-4 rounded-lg shadow-md">
+          <h3 className="font-semibold text-lg text-gray-800">Collaborators:</h3>
+          <p className="text-gray-700">{Object.values(project.collaborators).join(", ")}</p>
+        </div>
+  
+        {/* Pages Section */}
+        <div className="mt-6 bg-white p-4 rounded-lg shadow-md">
+          <h3 className="font-semibold text-lg text-gray-800">Pages:</h3>
+          <ul className="list-disc pl-5 space-y-2">
+            {Object.keys(project.pages).map((page) => (
+              <li key={page}>
+                <button
+                  onClick={() => openCommitsDialog(page)}
+                  className="text-blue-600 hover:text-blue-800 hover:underline transition duration-300"
+                >
+                  {page}
+                </button>
+              </li>
+            ))}
+          </ul>
+        </div>
+  
+        {/* Add Page Button */}
+        <button
+          onClick={() => setShowAddPageDialog(true)}
+          className="bg-gradient-to-r from-yellow-400 to-yellow-600 text-white px-6 py-3 rounded-lg mt-6 w-full hover:from-yellow-500 hover:to-yellow-700 transition-all duration-300 transform hover:scale-105"
+        >
+          Add Page
+        </button>
+  
+        {/* Add Collaborator Button */}
+        <button
+          onClick={() => setShowDialog(true)}
+          className="bg-gradient-to-r from-green-500 to-green-700 text-white px-6 py-3 rounded-lg mt-4 w-full hover:from-green-600 hover:to-green-800 transition-all duration-300 transform hover:scale-105"
+        >
+          Add Collaborator
+        </button>
+  
+        {/* Dialog for adding collaborator */}
+        {showDialog && (
+          <AddCollaborator setShowDialog={setShowDialog} project={project} />
+        )}
+  
+        {/* Dialog for viewing commits */}
+        {showCommitsDialog && (
+          <PageCommitsDialog
+            commits={selectedCommits}
+            onClose={() => setShowCommitsDialog(false)}
+            projectId={project._id}
+            page={showCommitsDialog}
+          />
+        )}
+  
+        {/* Dialog for adding a new page */}
+        {showAddPageDialog && (
+          <AddPageDialog
+            setShowDialog={setShowAddPageDialog}
+            projectId={project._id}
+            onPageAdded={handlePageAdded}
+            project={project}
+          />
+        )}
       </div>
-
-      {/* Pages Section */}
-      <div className="mt-4">
-        <h3 className="font-semibold">Pages:</h3>
-        <ul>
-          {Object.keys(project.pages).map((page) => (
-            <li key={page}>
-              <button
-                onClick={() => openCommitsDialog(page)}
-                className="text-blue-500 hover:underline"
-              >
-                {page}
-              </button>
-            </li>
-          ))}
-        </ul>
-      </div>
-
-      {/* Add Page Button */}
-      <button
-        onClick={() => setShowAddPageDialog(true)}
-        className="bg-yellow-500 text-white px-4 py-2 rounded mt-4 hover:bg-yellow-600 transition"
-      >
-        Add Page
-      </button>
-
-      {/* Add Collaborator Button */}
-      <button
-        onClick={() => setShowDialog(true)}
-        className="bg-green-500 text-white px-4 py-2 rounded mt-4 hover:bg-green-600 transition"
-      >
-        Add Collaborator
-      </button>
-
-      {/* Dialog for adding collaborator */}
-      {showDialog && (
-        <AddCollaborator setShowDialog={setShowDialog} project={project} />
-      )}
-
-      {/* Dialog for viewing commits */}
-      {showCommitsDialog && (
-        <PageCommitsDialog
-          commits={selectedCommits}
-          onClose={() => setShowCommitsDialog(false)}
-          projectId={project._id}
-          page={showCommitsDialog}
-        />
-      )}
-
-      {/* Dialog for adding a new page */}
-      {showAddPageDialog && (
-        <AddPageDialog
-          setShowDialog={setShowAddPageDialog}
-          projectId={project._id}
-          onPageAdded={handlePageAdded}
-          project={project}
-        />
-      )}
     </div>
   );
+  
+  
+  
 };
 
 export default Project;

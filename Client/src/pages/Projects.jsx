@@ -29,7 +29,7 @@ const Projects = () => {
   // Loading or error state
   if (loading)
     return <div className="text-center p-4">Loading projects...</div>;
-  if (error) return <div className="text-center text-red-500 p-4">{error}</div>;
+  if (error) return <div className="text-center text-red-400 p-4">{error}</div>;
 
   // Render Project component if a project is selected
   if (selectedProject) {
@@ -42,37 +42,45 @@ const Projects = () => {
   }
 
   return (
-    <div className="p-4">
-      <h2 className="text-2xl font-bold text-center mb-6">Projects</h2>
+
+    <div className="min-h-screen bg-gradient-to-r from-indigo-500 via-purple-600 to-pink-600 flex items-center justify-center">
+    <div className="p-6 bg-white rounded-lg shadow-lg w-full max-w-4xl">
+      <h2 className="text-3xl font-extrabold text-center text-gray-800 mb-8">
+        Projects
+      </h2>
+  
       <button
         onClick={() => setShowDialog(true)}
-        className="bg-green-500 text-white px-4 py-2 rounded hover:bg-green-600 transition"
+        className="bg-gradient-to-r from-green-400 to-green-600 text-white px-6 py-3 rounded-lg shadow-lg hover:from-green-500 hover:to-green-700 transition-colors ease-in-out duration-300"
       >
         Create Project
       </button>
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+  
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-8 mt-8">
         {projects &&
           projects.map((project) => (
             <div
               key={project._id}
-              className="bg-white shadow-lg rounded-lg p-6 hover:shadow-xl transition-shadow duration-200"
+              className="bg-white shadow-lg rounded-lg p-6 transform transition-all hover:scale-105 hover:shadow-2xl duration-300"
             >
-              <h3 className="text-xl font-semibold text-gray-800 mb-2">
+              <h3 className="text-2xl font-semibold text-gray-800 mb-3">
                 {project.name}
               </h3>
-
-              <div className="text-gray-500 text-sm mb-4">
+  
+              <div className="text-sm text-gray-600 mb-4">
                 Pages: {Object.keys(project.pages).length}
               </div>
+  
               <button
                 onClick={() => setSelectedProject(project)}
-                className="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600 transition"
+                className="bg-gradient-to-r from-blue-500 to-blue-600 text-white px-6 py-3 rounded-lg shadow-md hover:from-blue-600 hover:to-blue-700 transition-colors ease-in-out duration-300"
               >
                 Open Project
               </button>
             </div>
           ))}
       </div>
+  
       {showDialog && (
         <CreateProject
           setShowDialog={setShowDialog}
@@ -80,6 +88,9 @@ const Projects = () => {
         />
       )}
     </div>
+  </div>
+  
+  
   );
 };
 
