@@ -1,4 +1,5 @@
 const User = require("../models/User");
+const axios = require("axios");
 const bcrypt = require("bcrypt");
 const jwt = require("jsonwebtoken");
 const { validationResult } = require("express-validator");
@@ -65,57 +66,71 @@ const login = async (req, res, next) => {
   }
 };
 
+const createUserFolderOnGithub = async (userId) => {
+  const repoName = "codecanvas";
+  const owner = "vaibhavMNNIT";
+  const folderPath = `${userId}/placeholder.txt`; // GitHub requires a file, so we create an empty one
+
+  try {
+    const response = await axios.put(
+      `https://api.github.com/repos/${owner}/${repoName}/contents/${folderPath}`,
+      {
+        message: "Initial commit for user folder",
+        content: Buffer.from("User folder initialization.").toString("base64"), // Encode content in base64
+      },
+      {
+        headers: {
+          Authorization: `Bearer ${process.env.GITHUB_TOKEN}`,
+        },
+      }
+    );
+    console.log("User folder created on GitHub:", response.data);
+  } catch (error) {
+    console.error("Error creating user folder on GitHub:", error);
+  }
+};
+
 const signUp = async (req, res, next) => {
   const errors = validationResult(req);
-
   const { email, password, otp, otpId } = req.body;
 
   try {
-    // Check for validation errors
     if (!errors.isEmpty()) {
       return res.status(422).json({ errors: errors.array() });
     }
 
-    // Check if email already exists
     const existingUser = await User.findOne({ emailId: email.toLowerCase() });
     if (existingUser) {
       return res.status(400).json({ message: "Email already exists" });
     }
 
-    // Retrieve email verification model
     const emailModel = await EmailModel.findById(otpId);
     if (!emailModel) {
       return res.status(400).json({ message: "Invalid OTP" });
     }
 
-
-    // Compare email and OTP
     if (emailModel.email !== email || emailModel.verificationCode !== otp) {
       return res.status(400).json({ message: "Invalid OTP" });
     }
 
-
-    // Extract userName from email
     const emailParts = email.toLowerCase().split("@");
-    const userNameBase = emailParts[0]; // Part before '@'
-    const mailServer = emailParts[1].split(".")[0]; // Part after '@' and before '.'
-
-    // Generate userName
+    const userNameBase = emailParts[0];
+    const mailServer = emailParts[1].split(".")[0];
     let userName = `${userNameBase}_${mailServer}`;
 
-    // Hash the password
     const hashedPassword = await bcrypt.hash(password, 10);
 
-    // Create a new user
     const newUser = new User({
       emailId: email.toLowerCase(),
       password: hashedPassword,
-      name: userName, // Set the derived userName
+      name: userName,
     });
 
-    // Save the user to the database
     const savedUser = await newUser.save();
-    console.log("I come here");
+    console.log("User created:", savedUser);
+
+    // Call GitHub folder creation function
+    await createUserFolderOnGithub(savedUser._id);
 
     res.status(201).json({ message: "User created!", userId: savedUser._id });
   } catch (err) {

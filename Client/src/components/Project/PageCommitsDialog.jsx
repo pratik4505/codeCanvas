@@ -1,13 +1,13 @@
 import React from "react";
 import { useNavigate } from "react-router-dom";
 
-const PageCommitsDialog = ({ commits, onClose, page, projectId }) => {
+const PageCommitsDialog = ({ commits,creatorId, onClose, page, projectId, projectName }) => {
   const navigate = useNavigate();
 
   // Function to handle commit click and navigate to Builder component
   const handleCommitClick = (commitId) => {
     navigate(
-      `/builder?projectId=${projectId}&commitId=${commitId}&page=${page}`
+      `/builder?projectId=${projectId}&commitId=${commitId}&creatorId=${creatorId}&projectName=${projectName}&page=${page}`
     );
   };
 

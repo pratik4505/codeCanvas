@@ -2,13 +2,14 @@ import React, { useEffect } from "react";
 import { Frame, Element, useEditor } from "@craftjs/core";
 import TopPanel from "./TopPanel";
 import { useLocation } from "react-router-dom";
-import { fetchCommit } from "../../Api/projectApi";
+import { deployProject, fetchCommit } from "../../Api/projectApi";
 import { JsxOutput } from "./JsxOutput";
 
 const EditorPanel = () => {
   const location = useLocation();
   const que = new URLSearchParams(location.search);
   const projectId = que.get("projectId");
+  const projectName = que.get("projectName")
   const commitId = que.get("commitId");
   const page = que.get("page");
   const { actions } = useEditor();
@@ -32,6 +33,8 @@ const EditorPanel = () => {
     }
   }, [commitId]);
 
+
+
   return (
     <div
       className="bg-white p-4 border-l border-r border-gray-300 flex flex-col h-full"
@@ -53,6 +56,7 @@ const EditorPanel = () => {
           </Element>
         </Frame>
       </div>
+      <button onClick={() => deployProject(projectName)}>Host My Website</button>
 
       {/* JSX Output */}
       <JsxOutput className="mt-4" />

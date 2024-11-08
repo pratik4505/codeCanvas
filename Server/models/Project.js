@@ -8,6 +8,7 @@ const ProjectSchema = new Schema({
     type: Map,
     of: String,
   },
+  creatorId: { type: Schema.Types.ObjectId, ref: "User", required: true }, // To store the project creator
   pages: {
     type: Map,
     of: [

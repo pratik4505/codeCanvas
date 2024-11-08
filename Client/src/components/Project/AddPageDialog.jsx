@@ -5,8 +5,9 @@ import { addPage } from "../../Api/projectApi";
 const AddPageDialog = ({ setShowDialog, projectId, onPageAdded, project }) => {
   const [pageName, setPageName] = useState("");
   const [error, setError] = useState("");
-
+  const projectName = project.name;
   const handleSubmit = async () => {
+    console.log()
     // Check if pageName is empty
     if (!pageName) {
       setError("Page name is required.");
@@ -24,8 +25,8 @@ const AddPageDialog = ({ setShowDialog, projectId, onPageAdded, project }) => {
       const response = await addPage({
         projectId,
         pageName,
+        projectName
       });
-
       if (response.error) {
         setError("Failed to add page. Please try again.");
         return;

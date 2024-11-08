@@ -10,6 +10,51 @@ export const userProjects = async () => {
   }
 };
 
+export const deployProject = async (projectName) => {
+  // Retrieve userId from localStorage
+  const profile = JSON.parse(localStorage.getItem("profile"));
+
+  // Check if profile and userId exist
+  if (!profile || !profile.userId) {
+    console.error("User ID not found in localStorage");
+    alert("User is not logged in.");
+    return;
+  }
+
+  const userId = profile.userId;
+
+  try {
+    const response = await API.post("/project/deploy", {
+      userId,
+      projectName
+    });
+
+    // Check the structure of the response to properly log the URL
+
+    if (response.data && response.data.url) {
+      const liveUrl = response.data.url.url;  // Extract the URL
+      
+      console.log("Project deployed at:", liveUrl);
+      alert(`Project is live at: ${liveUrl}`);
+    
+      // Copy the URL to the clipboard
+      navigator.clipboard.writeText(liveUrl)
+        .then(() => {
+          console.log("URL copied to clipboard!");
+        })
+        .catch((error) => {
+          console.error("Failed to copy URL to clipboard:", error);
+        });
+    }
+     else {
+      alert("Deployment failed: No URL returned.");
+    }
+} catch (error) {
+    console.error("Deployment error:", error);
+    alert("Failed to deploy project.");
+  }
+};
+
 export const addCollaborator = async (data) => {
   try {
     const res = await API.post("/project/addCollaborator", data);
