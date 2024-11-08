@@ -193,7 +193,9 @@ nav .menu-btn,
   width: 50%;
 }
 .about-image img {
-  width: 600px;
+  width: 400px;
+  height: 567px;
+  border-radius: 12px;
 }
 
 #features {
@@ -441,6 +443,7 @@ nav .menu-btn,
   }
   .about-image {
     display: none;
+ 
   }
   .cv-btn {
     margin-left: 27%;
@@ -456,6 +459,7 @@ nav .menu-btn,
   .about-text {
     width: 90%;
   }
+  
   .about-text h1 {
     font-size: 4rem;
   }
