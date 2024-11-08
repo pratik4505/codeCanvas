@@ -1,6 +1,7 @@
 const Commit = require("../models/Commit");
 const Project = require("../models/Project");
 const User = require("../models/User");
+const axios = require("axios");
 
 const defaultCommitContent = `{"ROOT":{"type":"div","isCanvas":true,"props":{"id":"root","className":"w-full h-full"},"displayName":"div","custom":{},"hidden":false,"nodes":[],"linkedNodes":{}}}`;
 
@@ -99,20 +100,41 @@ const createProject = async (req, res) => {
   const userId = req.userId;
   const userName = req.name;
   const { name } = req.body;
+
   if (!userId || !name) {
-    return res
-      .status(400)
-      .json({ message: "User ID and project name are required." });
+    return res.status(400).json({ message: "User ID and project name are required." });
   }
 
   try {
-    // Step 1: Create the project with the given name and initial collaborator
+    // Step 1: Define the folder path for the user's project
+    const repoOwner = "vaibhavMNNIT";
+    const repoName = "codecanvas";
+    const projectFolderPath = `${userId}/${name}/index.html`; // Creates a user and project folder with a placeholder file
+
+    // Step 2: Initialize the project folder by creating a placeholder file in GitHub
+    const response = await axios.put(
+      `https://api.github.com/repos/${repoOwner}/${repoName}/contents/${projectFolderPath}`,
+      {
+        message: `Initialize project folder for ${name}`,
+        content: Buffer.from("This is the project folder initialization.").toString("base64"), // Base64 encoded content
+      },
+      {
+        headers: {
+          'Authorization': `Bearer ${process.env.GITHUB_TOKEN}`,
+          'Accept': 'application/vnd.github.v3+json',
+        },
+      }
+    );
+
+    // Step 3: Create the project in the database with the GitHub folder URL
     const newProject = new Project({
       name,
       collaborators: { [userId]: userName },
       pages: new Map(),
+      creatorId: userId,
     });
 
+    // Step 4: Create the initial commit entry
     const initialCommit = new Commit({
       projectId: newProject._id,
       commit: defaultCommitContent,
@@ -121,18 +143,19 @@ const createProject = async (req, res) => {
 
     await initialCommit.save();
 
-    // Step 3: Link the commit to the project pages
+    // Step 5: Link the commit to the project pages
     newProject.pages.set("index", [
       {
         commitId: initialCommit._id,
-        commitMessage: "initial commit",
+        commitMessage: "Initial commit",
         date: new Date(),
       },
     ]);
 
-    // Save the new project
+    // Save the new project in the database
     await newProject.save();
 
+    // Step 6: Send back the created project with GitHub folder URL
     res.status(201).json(newProject);
   } catch (error) {
     console.error("Error creating project:", error);
@@ -155,6 +178,7 @@ const fetchCommit = async (req, res) => {
 
 const addPage = async (req, res) => {
   const { projectId, pageName } = req.body;
+  console.log(projectId)
 
   if (!projectId || !pageName) {
     return res
