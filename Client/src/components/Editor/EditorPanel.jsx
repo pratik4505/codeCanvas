@@ -32,6 +32,8 @@ const EditorPanel = () => {
     }
   }, [commitId]);
 
+
+
   return (
     <div
       className="bg-white p-4 border-l border-r border-gray-300 flex flex-col h-full"

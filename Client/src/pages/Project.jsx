@@ -90,6 +90,8 @@ const Project = ({ project, goBack }) => {
             commits={selectedCommits}
             onClose={() => setShowCommitsDialog(false)}
             projectId={project._id}
+            creatorId={project.creatorId}
+            projectName={project.name}
             page={showCommitsDialog}
           />
         )}
