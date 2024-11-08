@@ -354,6 +354,65 @@ const addPage = async (req, res) => {
   }
 };
 
+const deployProjectToVercel = async (repoOwner, repoName, userFolderPath, projectFolderPath, projectName) => {
+  try {
+    console.log(projectFolderPath);
+    const deploymentConfig = {
+      name: `${repoName}-${userFolderPath}-${projectName}`, // Unique name for the deployment
+      target: "production",
+      public: true,
+      gitSource: {
+        type: "github",
+        repoId: "884459368", // Make sure to replace with the actual repo ID
+        repoOwner,
+        repoName,
+        path: projectFolderPath, // Use only projectFolderPath if it's structured correctly
+        ref: "main", // Ensure branch is correct
+      },
+      projectSettings: {
+        devCommand: null,           // No dev command if not needed
+        installCommand: null,       // No install command for static projects
+        buildCommand: null,         // No build command for static projects
+        outputDirectory: null,      // Static projects often don't need this
+        rootDirectory: projectFolderPath,        // Path to the root directory if needed (e.g. `/src`)
+        framework: null,            // No specific framework if it's plain HTML/CSS/JS
+      },
+    };
+    const response = await axios.post(
+      "https://api.vercel.com/v13/deployments",
+      deploymentConfig,
+      {
+        headers: {
+          Authorization: `Bearer ${process.env.VERCEL_API_TOKEN}`,
+        },
+      }
+    );
+    return response.data; // Returns the deployed project's URL
+  } catch (error) {
+    console.error("Deployment error:", error.response?.data || error.message);
+    if (error.response?.data?.errors) {
+      console.error("Detailed errors:", error.response.data.errors);
+    }
+    throw new Error("Deployment failed");
+  }
+};
+
+const deployProject = async (req, res) => {
+  const { userId, projectName } = req.body;
+
+  const repoOwner = "vaibhavMNNIT"; // Your GitHub username
+  const repoName = "codecanvas"; // GitHub repository name
+  const userFolderPath = `${userId}`; // Folder path for the user's ID
+  const projectFolderPath = `${userFolderPath}/${projectName}`; // Path for the project folder
+
+  try {
+    const url = await deployProjectToVercel(repoOwner, repoName, userFolderPath, projectFolderPath, projectName);
+    res.status(200).json({ message: "Project deployed successfully", url });
+  } catch (error) {
+    res.status(500).json({ message: "Deployment failed", error: error.message });
+  }
+};
+
 module.exports = {
   commit,
   userProjects,
@@ -361,4 +420,5 @@ module.exports = {
   createProject,
   fetchCommit,
   addPage,
+  deployProject
 };

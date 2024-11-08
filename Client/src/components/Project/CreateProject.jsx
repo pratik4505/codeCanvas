@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { createProject } from "../../Api/projectApi";
+import { createProject, deployProject } from "../../Api/projectApi";
 
 const CreateProject = ({ setShowDialog, setProjects }) => {
   const [projectName, setProjectName] = useState("");

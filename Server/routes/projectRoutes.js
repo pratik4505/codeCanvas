@@ -5,6 +5,7 @@ const {
   createProject,
   fetchCommit,
   addPage,
+  deployProject,
 } = require("../controllers/project");
 const verifyJWT = require("../middleware/verifyJWT");
 
@@ -16,5 +17,6 @@ router.post("/addCollaborator", verifyJWT, addCollaborator);
 router.post("/createProject", verifyJWT, createProject);
 router.get("/fetchCommit/:commitId", verifyJWT, fetchCommit);
 router.post("/addPage", verifyJWT, addPage);
+router.post("/deploy", verifyJWT, deployProject);
 
 module.exports = router;

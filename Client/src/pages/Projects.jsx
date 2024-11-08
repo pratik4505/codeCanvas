@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import { userProjects } from "../Api/projectApi";
+import { userProjects,deployProject } from "../Api/projectApi";
 import Project from "./Project";
 import CreateProject from "../components/Project/CreateProject";
 
@@ -77,6 +77,8 @@ const Projects = () => {
               >
                 Open Project
               </button>
+              <button onClick={() => deployProject(project.name)}>Host My Website</button>
+
             </div>
           ))}
       </div>
