@@ -6,8 +6,8 @@ const Chat = require("../models/Chat");
 const defaultCommitContent = `{"ROOT":{"type":"div","isCanvas":true,"props":{"id":"root","className":"w-full h-full"},"displayName":"div","custom":{},"hidden":false,"nodes":[],"linkedNodes":{}}}`;
 
 const commit = async (req, res) => {
-  const { page, creatorId, commit, projectId, commitMessage, projectName, htmlContent, cssContent } = req.body;
-  
+  const { page, commit, projectId, commitMessage, commitId } = req.body;
+
   try {
     // Step 1: Create and save the new commit in your database
     const newCommit = new Commit({
@@ -111,10 +111,11 @@ const pushToGitHub = async (req, res) => {
       updateFileOnGitHub(filePaths.html, htmlContent, `${commitMessage} - HTML update`),
       // updateFileOnGitHub(filePaths.css, cssContent, `${commitMessage} - CSS update`),
     ]);
+    console.log("I come hre")
 
     // Send success response
     res.status(200).json({
-      message: "Commit saved, project updated, and files uploaded to GitHub successfully",
+      message: "Files pushed to GitHub successfully",
     });
   } catch (error) {
     console.error("Error in push process:", error);
@@ -144,7 +145,7 @@ const findJson = async(req,res)=>{
 const getLiveUrl = async (req, res) => {
   try {
     const { projectId } = req.params;
-    
+    console.log(projectId)
     const project = await Project.findById(projectId);
     console.log(project)
     if (!project) {
@@ -277,6 +278,7 @@ const createProject = async (req, res) => {
     });
 
     await initialCommit.save();
+    console.log("i come hrer")
 
     // Step 5: Link the commit to the project pages
     newProject.pages.set("index", [
@@ -323,9 +325,7 @@ const addPage = async (req, res) => {
   const userId = req.userId;
 
   if (!projectId || !pageName) {
-    return res
-      .status(400)
-      .json({ message: "Project ID and page name are required." });
+    return res.status(400).json({ message: "Project ID and page name are required." });
   }
 
   try {
@@ -338,13 +338,8 @@ const addPage = async (req, res) => {
     const creatorId = project.creatorId;
 
     // Ensure that the user is a collaborator or the owner
-    if (
-      !project.collaborators.has(userId) &&
-      project.creatorId.toString() !== userId
-    ) {
-      return res.status(403).json({
-        message: "You do not have permission to add pages to this project.",
-      });
+    if (!project.collaborators.has(userId) && project.creatorId.toString() !== userId) {
+      return res.status(403).json({ message: "You do not have permission to add pages to this project." });
     }
 
     // Check if the page name already exists
@@ -364,9 +359,7 @@ const addPage = async (req, res) => {
     const htmlContent = Buffer.from(
       `<!DOCTYPE html><html><head><title>${pageName}</title><link rel="stylesheet" href="${pageName}.css"></head><body><h1>${pageName}</h1></body></html>`
     ).toString("base64");
-    const cssContent = Buffer.from(
-      `body { font-family: Arial, sans-serif; }`
-    ).toString("base64");
+    const cssContent = Buffer.from(`body { font-family: Arial, sans-serif; }`).toString("base64");
 
     const headers = {
       Authorization: `Bearer ${process.env.GITHUB_TOKEN}`,
@@ -393,7 +386,7 @@ const addPage = async (req, res) => {
     // Check if the files exist and retrieve their SHAs if they do
     const htmlFileSha = await getFileSha(htmlFilePath);
     const cssFileSha = await getFileSha(cssFilePath);
-
+    console.log("icakdfa")
     // Create or update HTML file in GitHub
     await axios.put(
       `https://api.github.com/repos/${repoOwner}/${repoName}/contents/${htmlFilePath}`,
@@ -419,11 +412,13 @@ const addPage = async (req, res) => {
     // Create a new commit for the added page
     const newCommit = new Commit({
       projectId: project._id,
-      commit: `Added ${pageName}.html and ${pageName}.css`,
+      commit: defaultCommitContent,
       page: pageName,
+      message:"Initial commit"
     });
-
+    console.log("asdfas")
     await newCommit.save();
+    console.log("adfas")
 
     // Add the page to the project's pages map
     project.pages.set(pageName, [
@@ -437,10 +432,7 @@ const addPage = async (req, res) => {
     // Save the updated project
     await project.save();
 
-    res.status(201).json({
-      name: pageName,
-      message: "Page created successfully with HTML and CSS files.",
-    });
+    res.status(201).json({ name: pageName, message: "Page created successfully with HTML and CSS files." });
   } catch (error) {
     if (error.response) {
       console.error("GitHub API Error:", error.response.data.message);
@@ -509,9 +501,35 @@ const deployProject = async (req, res) => {
   const projectFolderPath = `${userFolderPath}/${projectName}`; // Path for the project folder
 
   try {
-    const url = await deployProjectToVercel(repoOwner, repoName, userFolderPath, projectFolderPath, projectName);
-    res.status(200).json({ message: "Project deployed successfully", url });
+    // Step 1: Deploy the project and get the live URL
+    const { url } = await deployProjectToVercel(repoOwner, repoName, userFolderPath, projectFolderPath, projectName);
+    console.log("Deployment URL:", url);
+
+    // Ensure URL is a string
+    if (typeof url !== 'string') {
+      throw new Error("Deployment URL is not a valid string.");
+    }
+
+    // Step 2: Find the project in the database and update it with the live URL
+    const updatedProject = await Project.findOneAndUpdate(
+      { name: projectName, creatorId: userId }, // Find project by name and creator ID
+      { liveUrl: url }, // Update the project with the live URL
+      { new: true } // Return the updated project document
+    );
+
+    // Step 3: Respond with the success message and the live URL
+    if (!updatedProject) {
+      return res.status(404).json({ message: "Project not found" });
+    }
+
+    console.log("Updated Project:", updatedProject);
+
+    res.status(200).json({
+      message: "Project deployed successfully",
+      url: updatedProject.liveUrl, // Send back the updated URL
+    });
   } catch (error) {
+    console.error("Deployment error:", error.response?.data || error.message);
     res.status(500).json({ message: "Deployment failed", error: error.message });
   }
 };
@@ -525,5 +543,5 @@ module.exports = {
   createProject,
   fetchCommit,
   addPage,
-  deployProject
+  deployProject,getLiveUrl,pushToGitHub,findJson
 };
