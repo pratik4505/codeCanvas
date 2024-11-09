@@ -18,7 +18,7 @@ export const deployProject = async (projectName) => {
   if (!profile || !profile.userId) {
     console.error("User ID not found in localStorage");
     alert("User is not logged in.");
-    return;
+    return null; // Return null if there's no user ID
   }
 
   const userId = profile.userId;
@@ -29,31 +29,20 @@ export const deployProject = async (projectName) => {
       projectName
     });
 
-    // Check the structure of the response to properly log the URL
-
-    if (response.data && response.data.url) {
-      const liveUrl = response.data.url.url;  // Extract the URL
-      
-      console.log("Project deployed at:", liveUrl);
-      alert(`Project is live at: ${liveUrl}`);
-    
-      // Copy the URL to the clipboard
-      navigator.clipboard.writeText(liveUrl)
-        .then(() => {
-          console.log("URL copied to clipboard!");
-        })
-        .catch((error) => {
-          console.error("Failed to copy URL to clipboard:", error);
-        });
-    }
-     else {
+    // Check if the response has a URL in the expected structure
+    if (response?.data?.url) {
+      return response.data.url; // Return the live URL if it exists
+    } else {
       alert("Deployment failed: No URL returned.");
+      return null;
     }
-} catch (error) {
+  } catch (error) {
     console.error("Deployment error:", error);
     alert("Failed to deploy project.");
+    return null;
   }
 };
+
 
 export const addCollaborator = async (data) => {
   try {

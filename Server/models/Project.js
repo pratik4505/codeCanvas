@@ -25,6 +25,10 @@ const ProjectSchema = new Schema({
       },
     ],
   },
+  liveUrl: {
+    type: String,
+    default: null, // Initially, there's no live URL until the project is deployed
+  },
 });
 
 module.exports = mongoose.model("Project", ProjectSchema);

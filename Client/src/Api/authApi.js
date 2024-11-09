@@ -59,3 +59,14 @@ export const changePassword = async (data) => {
     return handleApiError(error);
   }
 };
+
+export const contactUs = async (formData) => {
+  try {
+    const res = await API.post(`/auth/contactUs`, formData);
+
+    if (res.status === 200) return { error: null, data: res.data };
+    else return { error: res, data: null };
+  } catch (error) {
+    return handleApiError(error);
+  }
+};

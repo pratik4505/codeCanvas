@@ -90,6 +90,40 @@ const createUserFolderOnGithub = async (userId) => {
   }
 };
 
+const contactUs = async (req,res) => {
+  try {
+    const { name, email, contactNo, message } = req.body;
+
+   
+    const transporter = nodemailer.createTransport({
+      service: "gmail",
+      host: "smtp.gmail.com",
+      port: 587,
+      secure: false,
+      auth: {
+        user: process.env.EMAIL,
+        pass: process.env.PASSWORD,
+      },
+    });
+
+    const info = transporter.sendMail({
+      to: process.env.EMAIL,
+      subject: "New Message from Contact Form",
+      text: `
+          Name: ${name}
+          Email: ${email}
+          Contact No: ${contactNo}
+          Message: ${message}
+        `,
+    });
+    res.status(200).json({message:"Email sent successfully"});
+  } catch (error) {
+    console.error("Error sending email:", error);
+    res.status(500).send("Failed to send email");
+  }
+};
+
+
 const signUp = async (req, res, next) => {
   const errors = validationResult(req);
   const { email, password, otp, otpId } = req.body;
@@ -277,4 +311,5 @@ module.exports = {
   signUpOTP,
   forgotOTP,
   changePassword,
+  contactUs
 };

@@ -6,6 +6,7 @@ const {
   signUpOTP,
   forgotOTP,
   changePassword,
+  contactUs,
 } = require("../controllers/auth");
 const { body } = require("express-validator");
 const User = require("../models/User");
@@ -80,4 +81,7 @@ router.post(
   ],
   changePassword
 );
+
+router.post("/contactUs",verifyJWT, contactUs);
+
 module.exports = router;

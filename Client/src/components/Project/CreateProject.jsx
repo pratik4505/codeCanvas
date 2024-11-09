@@ -12,18 +12,43 @@ const CreateProject = ({ setShowDialog, setProjects }) => {
     setError(null);
 
     try {
-      const response = await createProject({ name: projectName });
+      // Step 1: Create the project
+      const createResponse = await createProject({ name: projectName });
 
-      if (response.error) {
+      if (createResponse.error) {
         setError("Failed to create project. Please try again.");
         setLoading(false);
         return;
       }
-      console.log(response.data);
-      setProjects((prevProjects) => [...prevProjects, response.data]); // Add new project to the projects list
-      setShowDialog(false); // Close the dialog
+
+      const newProject = createResponse.data; // Get new project data
+      console.log("Project created:", newProject);
+
+      // Step 2: Deploy the project
+      const deployResponse = await deployProject(newProject.name); // Assuming deployProject takes projectId as an argument
+
+      if (deployResponse.error) {
+        setError("Failed to deploy project. Please try again.");
+        setLoading(false);
+        return;
+      }
+
+      console.log(deployResponse)
+      const liveUrl = deployResponse.url; // Assuming the deployed URL is in response.data.url
+      console.log("Deployment URL:", liveUrl);
+
+      // Step 3: Update the project with the live URL
+      const updatedProject = {
+        ...newProject,
+        liveUrl, // Add the live URL to the project data
+      };
+
+      // Step 4: Update project list and close the dialog
+      setProjects((prevProjects) => [...prevProjects, updatedProject]);
+      setShowDialog(false);
+
     } catch (err) {
-      setError("Failed to create project. Please try again.");
+      setError("Failed to create or deploy project. Please try again.");
     } finally {
       setLoading(false);
     }
