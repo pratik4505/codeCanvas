@@ -1,7 +1,5 @@
 import { useState, createContext, useEffect, useCallback } from "react";
 import io from "socket.io-client";
-//import { toast } from "react-toastify";
-import { Link } from "react-router-dom";
 
 export const GlobalContext = createContext();
 
@@ -11,7 +9,8 @@ export const GlobalProvider = ({ children }) => {
   const [socket, setSocket] = useState(
     io(baseUrl.replace("http", "ws"), {
       transports: ["websocket"],
-      upgrade: false,
+      reconnectionAttempts: 5,
+      reconnectionDelay: 2000,
       withCredentials: true,
       pingInterval: 1000 * 60,
       pingTimeout: 1000 * 60 * 3,
@@ -32,7 +31,7 @@ export const GlobalProvider = ({ children }) => {
       if (token && userId) {
         setUserData({ ...data });
 
-        //socket.emit("setup", userId);
+        socket.emit("setup", userId);
         listen();
       } else {
         console.log("user Not autorized");
@@ -51,19 +50,16 @@ export const GlobalProvider = ({ children }) => {
   };
 
   useEffect(() => {
-    // Function to send a ping to the server
+    socket.on("connect", () => {
+      console.log("Socket.IO connected");
+    });
 
-    // socket.on("connect", () => {
-    //   console.log("Socket.IO connected");
-    // });
-
-    // socket.on("connect_error", (error) => {
-    //   console.error("Socket.IO connection error:", error);
-    // });
+    socket.on("connect_error", (error) => {
+      console.error("Socket.IO connection error:", error);
+    });
 
     initialLoad();
     return () => {
-      // Disconnect the socket
       socket.disconnect();
     };
   }, [socket, initialLoad]);
