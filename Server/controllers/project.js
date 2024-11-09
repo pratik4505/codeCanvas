@@ -6,14 +6,16 @@ const axios = require("axios");
 const defaultCommitContent = `{"ROOT":{"type":"div","isCanvas":true,"props":{"id":"root","className":"w-full h-full"},"displayName":"div","custom":{},"hidden":false,"nodes":[],"linkedNodes":{}}}`;
 
 const commit = async (req, res) => {
-  const { page, creatorId, commit, projectId, commitMessage, projectName, htmlContent, cssContent } = req.body;
-  
+  const { page, commit, projectId, commitMessage, commitId } = req.body;
+
   try {
     // Step 1: Create and save the new commit in your database
     const newCommit = new Commit({
       projectId,
       commit,
       page,
+      parentId:commitId,
+      message:commitMessage
     });
     const savedCommit = await newCommit.save();
     console.log("New commit saved");
@@ -29,62 +31,10 @@ const commit = async (req, res) => {
       },
     });
 
-    // Step 3: Define GitHub file paths for the HTML and CSS
-    const filePaths = {
-      html: `${creatorId}/${projectName}/${page}.html`,
-      css: `${creatorId}/${projectName}/${page}.css`,
-    };
-    console.log("Updating GitHub files...");
-
-    // Step 4: GitHub API config
-    const githubConfig = {
-      owner: 'vaibhavMNNIT',
-      repo: 'codecanvas',
-      branch: 'main', // specify the branch
-      token: process.env.GITHUB_TOKEN, // GitHub personal access token
-    };
-
-    // Helper function to create/update files on GitHub
-    const updateFileOnGitHub = async (path, content, message) => {
-      const url = `https://api.github.com/repos/${githubConfig.owner}/${githubConfig.repo}/contents/${path}`;
-      const base64Content = Buffer.from(content).toString('base64');
-      let payload = {
-        message,
-        content: base64Content,
-        branch: githubConfig.branch,
-      };
-
-      try {
-        // Check if file already exists to get its SHA if it does
-        const { data: existingFile } = await axios.get(url, {
-          headers: { Authorization: `Bearer ${githubConfig.token}` },
-        });
-        // If file exists, add the SHA to the payload for updating
-        payload.sha = existingFile.sha;
-      } catch (error) {
-        if (error.response && error.response.status === 404) {
-          console.log(`File ${path} does not exist, creating new file`);
-          // File does not exist, so we skip adding SHA for new file creation
-        } else {
-          throw new Error(`Error checking file existence for ${path}: ${error.message}`);
-        }
-      }
-
-      // Commit to GitHub (create or update based on the payload)
-      await axios.put(url, payload, {
-        headers: { Authorization: `Bearer ${githubConfig.token}` },
-      });
-    };
-
-    // Update HTML and CSS files on GitHub
-    await Promise.all([
-      updateFileOnGitHub(filePaths.html, htmlContent, `${commitMessage} - HTML update`),
-      // updateFileOnGitHub(filePaths.css, cssContent, `${commitMessage} - CSS update`),
-    ]);
-
     // Respond with success
     res.status(200).json({
-      message: "Commit saved, project updated, and files uploaded to GitHub successfully",
+      message: "Commit saved and project updated successfully",
+      commitId: savedCommit._id, // Optionally return commit ID if needed
     });
   } catch (error) {
     console.error("Error in commit process:", error);
@@ -92,7 +42,119 @@ const commit = async (req, res) => {
   }
 };
 
+const pushToGitHub = async (req, res) => {
+  console.log("I come here");
 
+  // Destructure incoming request body
+  const { projectId, page, commitMessage, htmlContent} = req.body;
+  console.log(projectId);
+
+  try {
+    // Fetch project details from the database
+    const project = await Project.findById(projectId);
+    if (!project) {
+      return res.status(404).json({ error: "Project not found" });
+    }
+
+    const { creatorId, name } = project;
+
+    // GitHub File paths for HTML and CSS
+    const filePaths = {
+      html: `${creatorId}/${name}/${page}.html`,
+    };
+
+    console.log("Pushing updates to GitHub...");
+
+    // GitHub API configuration
+    const githubConfig = {
+      owner: 'vaibhavMNNIT', // Replace with your GitHub username
+      repo: 'codecanvas', // Replace with your GitHub repository name
+      branch: 'main', // Target branch for the commit
+      token: process.env.GITHUB_TOKEN, // GitHub personal access token
+    };
+
+    // Helper function to update files on GitHub
+    const updateFileOnGitHub = async (path, content, message) => {
+      const url = `https://api.github.com/repos/${githubConfig.owner}/${githubConfig.repo}/contents/${path}`;
+      const base64Content = Buffer.from(content).toString('base64');
+      const payload = {
+        message,
+        content: base64Content,
+        branch: githubConfig.branch,
+      };
+
+      try {
+        // Check if the file already exists on GitHub
+        const { data: existingFile } = await axios.get(url, {
+          headers: { Authorization: `Bearer ${githubConfig.token}` },
+        });
+        // If file exists, include its SHA in the payload for updating
+        payload.sha = existingFile.sha;
+      } catch (error) {
+        if (error.response?.status === 404) {
+          console.log(`File ${path} does not exist, creating new file.`);
+        } else {
+          throw new Error(`Error checking file existence for ${path}: ${error.message}`);
+        }
+      }
+
+      // Commit the file to GitHub (either create or update)
+      await axios.put(url, payload, {
+        headers: { Authorization: `Bearer ${githubConfig.token}` },
+      });
+    };
+
+    // Update both HTML and CSS files on GitHub
+    await Promise.all([
+      updateFileOnGitHub(filePaths.html, htmlContent, `${commitMessage} - HTML update`),
+    ]);
+
+    // Send success response
+    res.status(200).json({
+      message: "Files pushed to GitHub successfully",
+    });
+  } catch (error) {
+    console.error("Error in push process:", error);
+    // Send failure response with the error message
+    res.status(500).json({ error: "Failed to push files to GitHub", details: error.message });
+  }
+};
+
+
+
+const findJson = async(req,res)=>{
+  try {
+    const { commitId } = req.params;
+    console.log(commitId);
+    const commit = await Commit.findById(commitId);
+    if (!commit) {
+      return res.status(404).json({ message: 'Commit not found' });
+    }
+    console.log(commit)
+    res.json(commit);
+  } catch (error) {
+    console.error("Error fetching commit data:", error);
+    res.status(500).json({ message: 'Internal server error' });
+  }
+}
+
+const getLiveUrl = async (req, res) => {
+  try {
+    const { projectId } = req.params;
+    
+    const project = await Project.findById(projectId);
+    console.log(project)
+    if (!project) {
+      return res.status(404).json({ message: "Project not found" });
+    }
+
+    // Return the live URL
+    res.status(200).json({ liveUrl: project.liveUrl });
+  } catch (error) {
+    console.error("Error fetching live URL:", error);
+    res.status(500).json({ error: "Internal server error" });
+  }
+};
 
 const userProjects = async (req, res) => {
   const { userId } = req;
@@ -195,6 +257,7 @@ const createProject = async (req, res) => {
     const initialCommit = new Commit({
       projectId: newProject._id,
       commit: defaultCommitContent,
+      message:"Inital commit",
       page: "index",
     });
 
@@ -406,12 +469,40 @@ const deployProject = async (req, res) => {
   const projectFolderPath = `${userFolderPath}/${projectName}`; // Path for the project folder
 
   try {
-    const url = await deployProjectToVercel(repoOwner, repoName, userFolderPath, projectFolderPath, projectName);
-    res.status(200).json({ message: "Project deployed successfully", url });
+    // Step 1: Deploy the project and get the live URL
+    const { url } = await deployProjectToVercel(repoOwner, repoName, userFolderPath, projectFolderPath, projectName);
+    console.log("Deployment URL:", url);
+
+    // Ensure URL is a string
+    if (typeof url !== 'string') {
+      throw new Error("Deployment URL is not a valid string.");
+    }
+
+    // Step 2: Find the project in the database and update it with the live URL
+    const updatedProject = await Project.findOneAndUpdate(
+      { name: projectName, creatorId: userId }, // Find project by name and creator ID
+      { liveUrl: url }, // Update the project with the live URL
+      { new: true } // Return the updated project document
+    );
+
+    // Step 3: Respond with the success message and the live URL
+    if (!updatedProject) {
+      return res.status(404).json({ message: "Project not found" });
+    }
+
+    console.log("Updated Project:", updatedProject);
+
+    res.status(200).json({
+      message: "Project deployed successfully",
+      url: updatedProject.liveUrl, // Send back the updated URL
+    });
   } catch (error) {
+    console.error("Deployment error:", error.response?.data || error.message);
     res.status(500).json({ message: "Deployment failed", error: error.message });
   }
 };
+
+
 
 module.exports = {
   commit,
@@ -420,5 +511,8 @@ module.exports = {
   createProject,
   fetchCommit,
   addPage,
-  deployProject
+  deployProject,
+  getLiveUrl,
+  pushToGitHub,
+  findJson
 };

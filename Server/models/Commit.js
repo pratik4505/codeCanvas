@@ -7,6 +7,8 @@ const commitSchema = new mongoose.Schema(
       ref: "Project",
       required: true,
     },
+    parentId:{type:mongoose.Schema.Types.ObjectId, ref:"Commit", required:false},
+    message:{type:String, required:true},
     commit: {
       type: String, // Store as a JSON string
       required: true,

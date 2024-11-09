@@ -1,7 +1,11 @@
 import React from "react";
 import { useNavigate } from "react-router-dom";
+import axios from "axios"; // Import axios
+import { handlePushClick } from "../../Api/projectApi";
 
-const PageCommitsDialog = ({ commits,creatorId, onClose, page, projectId, projectName }) => {
+
+
+const PageCommitsDialog = ({ commits, creatorId, onClose, page, projectId, projectName }) => {
   const navigate = useNavigate();
 
   // Function to handle commit click and navigate to Builder component
@@ -27,7 +31,6 @@ const PageCommitsDialog = ({ commits,creatorId, onClose, page, projectId, projec
               <li
                 key={commit.commitId}
                 className="mb-3 cursor-pointer p-2 rounded hover:bg-gray-100"
-                onClick={() => handleCommitClick(commit.commitId)}
               >
                 <p>
                   <strong>Commit ID:</strong> {commit.commitId}
@@ -39,6 +42,20 @@ const PageCommitsDialog = ({ commits,creatorId, onClose, page, projectId, projec
                   <strong>Date:</strong>{" "}
                   {new Date(commit.date).toLocaleString()}
                 </p>
+                {/* Commit click to navigate */}
+                <button
+                  onClick={() => handleCommitClick(commit.commitId)}
+                  className="text-blue-600 hover:underline mt-2"
+                >
+                  View in Builder
+                </button>
+                {/* Push button for this commit */}
+                <button
+                  onClick={() => handlePushClick(commit.commitId)}
+                  className="text-green-600 hover:underline mt-2 ml-2"
+                >
+                  Push to GitHub
+                </button>
               </li>
             ))
           ) : (
@@ -51,3 +68,6 @@ const PageCommitsDialog = ({ commits,creatorId, onClose, page, projectId, projec
 };
 
 export default PageCommitsDialog;
+
+
+

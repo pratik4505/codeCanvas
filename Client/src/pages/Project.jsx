@@ -3,9 +3,11 @@ import AddCollaborator from "../components/Project/AddCollaborator";
 import PageCommitsDialog from "../components/Project/PageCommitsDialog";
 import AddPageDialog from "../components/Project/AddPageDialog";
 import { useNavigate } from "react-router-dom";
+import { deployProject } from "../Api/projectApi";
 
 const Project = ({ project, goBack }) => {
   const navigate = useNavigate();
+  console.log(project)
 
   const goHome = () => {
     navigate("/");
@@ -18,6 +20,7 @@ const Project = ({ project, goBack }) => {
 
   const openCommitsDialog = (pageName) => {
     const commits = project.pages[pageName] || [];
+    console.log(commits)
     setSelectedCommits(commits.sort((a, b) => new Date(b.date) - new Date(a.date)));
     setShowCommitsDialog(pageName);
   };
@@ -74,9 +77,11 @@ const Project = ({ project, goBack }) => {
         </div>
 
         {/* Add Buttons */}
+        <button onClick={() => deployProject(project.name)} className="bg-gradient-to-r from-yellow-400 to-yellow-600 text-white px-6 py-3 rounded-lg mt-6 w-full hover:from-yellow-500 hover:to-yellow-700 transition-all duration-300 transform hover:scale-105">Host My Website</button>
+
         <button
           onClick={() => setShowAddPageDialog(true)}
-          className="bg-gradient-to-r from-yellow-400 to-yellow-600 text-white px-6 py-3 rounded-lg mt-6 w-full hover:from-yellow-500 hover:to-yellow-700 transition-all duration-300 transform hover:scale-105"
+          className="bg-gradient-to-r from-green-500 to-green-700 text-white px-6 py-3 rounded-lg mt-4 w-full hover:from-green-600 hover:to-green-800 transition-all duration-300 transform hover:scale-105"
         >
           Add Page
         </button>
@@ -122,4 +127,8 @@ const Project = ({ project, goBack }) => {
   );
 };
 
+
+
 export default Project;
+
+

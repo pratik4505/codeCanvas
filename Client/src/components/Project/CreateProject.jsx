@@ -42,6 +42,7 @@ const CreateProject = ({ setShowDialog, setProjects }) => {
         ...newProject,
         liveUrl, // Add the live URL to the project data
       };
+      console.log(updatedProject)
 
       // Step 4: Update project list and close the dialog
       setProjects((prevProjects) => [...prevProjects, updatedProject]);

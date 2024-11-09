@@ -10,6 +10,7 @@ const TopPanel = () => {
   const projectName = que.get("projectName");
   const page = que.get("page");
   const creatorId = que.get("creatorId")
+  const commitId = que.get("commitId");
 
   const { actions, canUndo, canRedo, query } = useEditor((_, query) => ({
     canUndo: query.history.canUndo(),
@@ -22,20 +23,14 @@ const TopPanel = () => {
     // Step 1: Serialize editor content
     const editorJson = query.serialize();
 
-    // Step 2: Convert JSON to HTML and CSS
-    const { html, css } = jsonToHtmlCss(editorJson);
-
     try {
       // Step 3: Commit the HTML and CSS content to GitHub
       const response = await commit({
         projectId,
         page,
-        projectName,
-        creatorId,
         commit:editorJson,
         commitMessage,
-        htmlContent: html,
-        cssContent: css,
+        commitId
       });
 
       if (!response.error) {
@@ -92,89 +87,5 @@ const TopPanel = () => {
 };
 
 // Utility function to convert JSON to HTML and CSS (from your existing code)
-const jsonToHtmlCss = (json) => {
-  const parsedJson = JSON.parse(json);
-  let html = "<!DOCTYPE html><html><head><link rel='stylesheet' href='styles.css'></head><body>";
-  let css = "";
-
-  const parseNode = (nodeId) => {
-    const node = parsedJson[nodeId];
-    if (!node) {
-      console.warn(`Node with ID ${nodeId} not found.`);
-      return { html: '', css: '' };
-    }
-
-    const { displayName, props = {}, nodes = [], linkedNodes = {} } = node;
-    let nodeHtml = "";
-    let nodeCss = "";
-
-    switch (displayName) {
-      case "div":
-        nodeHtml += `<div id="${props.id || ''}" class="${props.className || ''}">`;
-        break;
-      case "Text":
-        const fontSize = props.fontSize ? `font-size: ${props.fontSize}px;` : '';
-        nodeHtml += `<p style="${fontSize}">${props.text || ''}</p>`;
-        break;
-      case "Button":
-        nodeHtml += `<button class="${props.className || ''}" style="${props.style || ''}">${props.text || 'Button'}</button>`;
-        break;
-      case "Column":
-        nodeHtml += `<div class="w-full ${props.className || ''}">`;
-        break;
-      case "Columns":
-        nodeHtml += `<div class="flex flex-row ${props.className || ''}" style="gap: ${props.gap || 0}px;">`;
-        break;
-      case "Container":
-        nodeHtml += `<div class="${props.className || ''}" id="${props.id || ''}">`;
-        break;
-      case "Row":
-        nodeHtml += `<div class="flex flex-col ${props.className || ''}">`;
-        break;
-      case "Rows":
-        nodeHtml += `<div class="flex flex-col ${props.className || ''}" style="gap: ${props.gap || 0}px;">`;
-        break;
-      default:
-        console.warn(`Unhandled display name: ${displayName}`);
-    }
-
-    nodes.forEach((childId) => {
-      const { html: childHtml, css: childCss } = parseNode(childId);
-      nodeHtml += childHtml;
-      nodeCss += childCss;
-    });
-
-    Object.values(linkedNodes).forEach((linkedNodeId) => {
-      const { html: linkedHtml, css: linkedCss } = parseNode(linkedNodeId);
-      nodeHtml += linkedHtml;
-      nodeCss += linkedCss;
-    });
-
-    switch (displayName) {
-      case "div":
-      case "Column":
-      case "Columns":
-      case "Container":
-      case "Row":
-      case "Rows":
-        nodeHtml += `</div>`;
-        break;
-      case "Button":
-        nodeHtml += `</button>`;
-        break;
-    }
-
-    return { html: nodeHtml, css: nodeCss };
-  };
-
-  const rootNodeId = "ROOT";
-  const { html: rootHtml, css: rootCss } = parseNode(rootNodeId);
-
-  html += rootHtml;
-  css += rootCss;
-  html += "</body></html>";
-
-  return { html, css };
-};
 
 export default TopPanel;

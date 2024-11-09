@@ -56,7 +56,6 @@ const EditorPanel = () => {
           </Element>
         </Frame>
       </div>
-      <button onClick={() => deployProject(projectName)}>Host My Website</button>
 
       {/* JSX Output */}
       <JsxOutput className="mt-4" />

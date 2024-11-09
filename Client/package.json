@@ -11,6 +11,7 @@
   },
   "dependencies": {
     "@craftjs/core": "^0.2.11",
+    "antd": "^5.21.6",
     "axios": "^1.7.7",
     "express": "^4.21.1",
     "react": "^18.3.1",
