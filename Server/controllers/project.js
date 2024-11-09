@@ -2,12 +2,12 @@ const Commit = require("../models/Commit");
 const Project = require("../models/Project");
 const User = require("../models/User");
 const axios = require("axios");
-
+const Chat = require("../models/Chat");
 const defaultCommitContent = `{"ROOT":{"type":"div","isCanvas":true,"props":{"id":"root","className":"w-full h-full"},"displayName":"div","custom":{},"hidden":false,"nodes":[],"linkedNodes":{}}}`;
 
 const commit = async (req, res) => {
-  const { page, commit, projectId, commitMessage, commitId } = req.body;
-
+  const { page, creatorId, commit, projectId, commitMessage, projectName, htmlContent, cssContent } = req.body;
+  
   try {
     // Step 1: Create and save the new commit in your database
     const newCommit = new Commit({
@@ -67,9 +67,9 @@ const pushToGitHub = async (req, res) => {
 
     // GitHub API configuration
     const githubConfig = {
-      owner: 'vaibhavMNNIT', // Replace with your GitHub username
-      repo: 'codecanvas', // Replace with your GitHub repository name
-      branch: 'main', // Target branch for the commit
+      owner: 'vaibhavMNNIT',
+      repo: 'codecanvas',
+      branch: 'main', // specify the branch
       token: process.env.GITHUB_TOKEN, // GitHub personal access token
     };
 
@@ -77,7 +77,7 @@ const pushToGitHub = async (req, res) => {
     const updateFileOnGitHub = async (path, content, message) => {
       const url = `https://api.github.com/repos/${githubConfig.owner}/${githubConfig.repo}/contents/${path}`;
       const base64Content = Buffer.from(content).toString('base64');
-      const payload = {
+      let payload = {
         message,
         content: base64Content,
         branch: githubConfig.branch,
@@ -94,7 +94,9 @@ const pushToGitHub = async (req, res) => {
         if (error.response?.status === 404) {
           console.log(`File ${path} does not exist, creating new file.`);
         } else {
-          throw new Error(`Error checking file existence for ${path}: ${error.message}`);
+          throw new Error(
+            `Error checking file existence for ${path}: ${error.message}`
+          );
         }
       }
 
@@ -107,11 +109,12 @@ const pushToGitHub = async (req, res) => {
     // Update both HTML and CSS files on GitHub
     await Promise.all([
       updateFileOnGitHub(filePaths.html, htmlContent, `${commitMessage} - HTML update`),
+      // updateFileOnGitHub(filePaths.css, cssContent, `${commitMessage} - CSS update`),
     ]);
 
     // Send success response
     res.status(200).json({
-      message: "Files pushed to GitHub successfully",
+      message: "Commit saved, project updated, and files uploaded to GitHub successfully",
     });
   } catch (error) {
     console.error("Error in push process:", error);
@@ -207,6 +210,14 @@ const addCollaborator = async (req, res) => {
     // Save the updated project
     await project.save();
 
+    let chat = await Chat.findOne({ id: projectId });
+
+    // Update the members of the existing chat
+    chat.members.set(collaboratorId, userName);
+
+    // Save the updated chat
+    await chat.save();
+
     // Return the collaborator's ID and name
     res.status(200).json({ id: collaboratorId, name: userName });
   } catch (error) {
@@ -221,7 +232,9 @@ const createProject = async (req, res) => {
   const { name } = req.body;
 
   if (!userId || !name) {
-    return res.status(400).json({ message: "User ID and project name are required." });
+    return res
+      .status(400)
+      .json({ message: "User ID and project name are required." });
   }
 
   try {
@@ -235,12 +248,14 @@ const createProject = async (req, res) => {
       `https://api.github.com/repos/${repoOwner}/${repoName}/contents/${projectFolderPath}`,
       {
         message: `Initialize project folder for ${name}`,
-        content: Buffer.from("This is the project folder initialization.").toString("base64"), // Base64 encoded content
+        content: Buffer.from(
+          "This is the project folder initialization."
+        ).toString("base64"), // Base64 encoded content
       },
       {
         headers: {
-          'Authorization': `Bearer ${process.env.GITHUB_TOKEN}`,
-          'Accept': 'application/vnd.github.v3+json',
+          Authorization: `Bearer ${process.env.GITHUB_TOKEN}`,
+          Accept: "application/vnd.github.v3+json",
         },
       }
     );
@@ -275,6 +290,13 @@ const createProject = async (req, res) => {
     // Save the new project in the database
     await newProject.save();
 
+    const chat = new Chat({
+      id: newProject._id,
+      members: { [userId]: userName },
+      chatName: name,
+    });
+    await chat.save();
+
     // Step 6: Send back the created project with GitHub folder URL
     res.status(201).json(newProject);
   } catch (error) {
@@ -301,7 +323,9 @@ const addPage = async (req, res) => {
   const userId = req.userId;
 
   if (!projectId || !pageName) {
-    return res.status(400).json({ message: "Project ID and page name are required." });
+    return res
+      .status(400)
+      .json({ message: "Project ID and page name are required." });
   }
 
   try {
@@ -314,8 +338,13 @@ const addPage = async (req, res) => {
     const creatorId = project.creatorId;
 
     // Ensure that the user is a collaborator or the owner
-    if (!project.collaborators.has(userId) && project.creatorId.toString() !== userId) {
-      return res.status(403).json({ message: "You do not have permission to add pages to this project." });
+    if (
+      !project.collaborators.has(userId) &&
+      project.creatorId.toString() !== userId
+    ) {
+      return res.status(403).json({
+        message: "You do not have permission to add pages to this project.",
+      });
     }
 
     // Check if the page name already exists
@@ -335,7 +364,9 @@ const addPage = async (req, res) => {
     const htmlContent = Buffer.from(
       `<!DOCTYPE html><html><head><title>${pageName}</title><link rel="stylesheet" href="${pageName}.css"></head><body><h1>${pageName}</h1></body></html>`
     ).toString("base64");
-    const cssContent = Buffer.from(`body { font-family: Arial, sans-serif; }`).toString("base64");
+    const cssContent = Buffer.from(
+      `body { font-family: Arial, sans-serif; }`
+    ).toString("base64");
 
     const headers = {
       Authorization: `Bearer ${process.env.GITHUB_TOKEN}`,
@@ -406,7 +437,10 @@ const addPage = async (req, res) => {
     // Save the updated project
     await project.save();
 
-    res.status(201).json({ name: pageName, message: "Page created successfully with HTML and CSS files." });
+    res.status(201).json({
+      name: pageName,
+      message: "Page created successfully with HTML and CSS files.",
+    });
   } catch (error) {
     if (error.response) {
       console.error("GitHub API Error:", error.response.data.message);
@@ -417,7 +451,13 @@ const addPage = async (req, res) => {
   }
 };
 
-const deployProjectToVercel = async (repoOwner, repoName, userFolderPath, projectFolderPath, projectName) => {
+const deployProjectToVercel = async (
+  repoOwner,
+  repoName,
+  userFolderPath,
+  projectFolderPath,
+  projectName
+) => {
   try {
     console.log(projectFolderPath);
     const deploymentConfig = {
@@ -433,12 +473,12 @@ const deployProjectToVercel = async (repoOwner, repoName, userFolderPath, projec
         ref: "main", // Ensure branch is correct
       },
       projectSettings: {
-        devCommand: null,           // No dev command if not needed
-        installCommand: null,       // No install command for static projects
-        buildCommand: null,         // No build command for static projects
-        outputDirectory: null,      // Static projects often don't need this
-        rootDirectory: projectFolderPath,        // Path to the root directory if needed (e.g. `/src`)
-        framework: null,            // No specific framework if it's plain HTML/CSS/JS
+        devCommand: null, // No dev command if not needed
+        installCommand: null, // No install command for static projects
+        buildCommand: null, // No build command for static projects
+        outputDirectory: null, // Static projects often don't need this
+        rootDirectory: projectFolderPath, // Path to the root directory if needed (e.g. `/src`)
+        framework: null, // No specific framework if it's plain HTML/CSS/JS
       },
     };
     const response = await axios.post(
@@ -469,35 +509,9 @@ const deployProject = async (req, res) => {
   const projectFolderPath = `${userFolderPath}/${projectName}`; // Path for the project folder
 
   try {
-    // Step 1: Deploy the project and get the live URL
-    const { url } = await deployProjectToVercel(repoOwner, repoName, userFolderPath, projectFolderPath, projectName);
-    console.log("Deployment URL:", url);
-
-    // Ensure URL is a string
-    if (typeof url !== 'string') {
-      throw new Error("Deployment URL is not a valid string.");
-    }
-
-    // Step 2: Find the project in the database and update it with the live URL
-    const updatedProject = await Project.findOneAndUpdate(
-      { name: projectName, creatorId: userId }, // Find project by name and creator ID
-      { liveUrl: url }, // Update the project with the live URL
-      { new: true } // Return the updated project document
-    );
-
-    // Step 3: Respond with the success message and the live URL
-    if (!updatedProject) {
-      return res.status(404).json({ message: "Project not found" });
-    }
-
-    console.log("Updated Project:", updatedProject);
-
-    res.status(200).json({
-      message: "Project deployed successfully",
-      url: updatedProject.liveUrl, // Send back the updated URL
-    });
+    const url = await deployProjectToVercel(repoOwner, repoName, userFolderPath, projectFolderPath, projectName);
+    res.status(200).json({ message: "Project deployed successfully", url });
   } catch (error) {
-    console.error("Deployment error:", error.response?.data || error.message);
     res.status(500).json({ message: "Deployment failed", error: error.message });
   }
 };
@@ -511,8 +525,5 @@ module.exports = {
   createProject,
   fetchCommit,
   addPage,
-  deployProject,
-  getLiveUrl,
-  pushToGitHub,
-  findJson
+  deployProject
 };

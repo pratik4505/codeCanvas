@@ -3,6 +3,7 @@ import { handleLivePreview, userProjects } from "../Api/projectApi";
 import Project from "./Project";
 import CreateProject from "../components/Project/CreateProject";
 import { useNavigate } from "react-router-dom";
+import MessageContainer from "../components/Chat/MessageContainer";
 
 const Projects = () => {
   const navigate = useNavigate();
@@ -10,6 +11,7 @@ const Projects = () => {
   const handleClick = () => {
     navigate("/");
   };
+
   const [projects, setProjects] = useState([]);
   const [filteredProjects, setFilteredProjects] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -19,6 +21,7 @@ const Projects = () => {
   const [showDialog, setShowDialog] = useState(false);
   const [sidebarOpen, setSidebarOpen] = useState(true);
   const [searchQuery, setSearchQuery] = useState("");
+  const [currChat, setCurrChat] = useState(null);
 
   // Fetch projects from backend
   useEffect(() => {
@@ -47,7 +50,8 @@ const Projects = () => {
   }, [searchQuery, projects]);
 
   // Loading or error state
-  if (loading) return <div className="text-center p-4">Loading projects...</div>;
+  if (loading)
+    return <div className="text-center p-4">Loading projects...</div>;
   if (error) return <div className="text-center text-red-400 p-4">{error}</div>;
   if (showSelectedProject) {
     return (
@@ -78,19 +82,18 @@ const Projects = () => {
           <h2 className="text-xl font-semibold text-gray-800">Projects</h2>
           <div className="flex gap-2">
             <button
-            onClick={() => handleClick()}
-            className="bg-gradient-to-r from-green-400 to-green-600 text-white px-4 py-2 rounded-lg shadow hover:from-green-500 hover:to-green-700 transition duration-300"
-          >
-            Go To Home
-          </button>
-          <button
-            onClick={() => setShowDialog(true)}
-            className="bg-gradient-to-r from-green-400 to-green-600 text-white px-4 py-2 rounded-lg shadow hover:from-green-500 hover:to-green-700 transition duration-300"
-          >
-            Create Project
-          </button>
+              onClick={() => handleClick()}
+              className="bg-gradient-to-r from-green-400 to-green-600 text-white px-4 py-2 rounded-lg shadow hover:from-green-500 hover:to-green-700 transition duration-300"
+            >
+              Go To Home
+            </button>
+            <button
+              onClick={() => setShowDialog(true)}
+              className="bg-gradient-to-r from-green-400 to-green-600 text-white px-4 py-2 rounded-lg shadow hover:from-green-500 hover:to-green-700 transition duration-300"
+            >
+              Create Project
+            </button>
           </div>
-          
         </div>
 
         {/* Search Bar */}
@@ -109,14 +112,25 @@ const Projects = () => {
           {filteredProjects.map((project) => (
             <div
               key={project._id}
-              onClick={() => setSelectedProject(project)}
+              onClick={() => {
+                setCurrChat({
+                  id: project._id,
+                  members: project.collaborators,
+                  chatName: project.name,
+                });
+                setSelectedProject(project);
+              }}
               className={`p-4 flex justify-between items-center cursor-pointer hover:bg-gray-100 transition duration-200 ${
                 selectedProject?._id === project._id ? "bg-gray-100" : ""
               }`}
             >
               <div>
-                <h3 className="text-lg font-semibold text-gray-800">{project.name}</h3>
-                <div className="text-sm text-gray-600">Pages: {Object.keys(project.pages).length}</div>
+                <h3 className="text-lg font-semibold text-gray-800">
+                  {project.name}
+                </h3>
+                <div className="text-sm text-gray-600">
+                  Pages: {Object.keys(project.pages).length}
+                </div>
               </div>
               <div className="flex gap-2">
               <button
@@ -145,19 +159,15 @@ const Projects = () => {
       </div>
 
       {/* Main Panel for Project Details or Chat */}
-      <div className="w-full lg:w-2/3 flex flex-col ml-auto p-6">
-        {selectedProject ? (
-          <div className="flex-1 bg-white shadow-lg rounded-lg p-6">
-            <h3 className="text-2xl font-bold text-gray-800 mb-4">
-              {selectedProject.name} - Live Chat
-            </h3>
-            <div className="border border-gray-200 rounded-lg p-4 h-[80%] flex flex-col">
-              <div className="flex-1 text-gray-600 mb-4">
-                Chat messages for {selectedProject.name} would appear here.
-              </div>
-              {/* Action buttons (if needed) */}
-            </div>
-          </div>
+      <div className="w-full lg:w-2/3 flex flex-col ml-auto ">
+        {currChat ? (
+          <MessageContainer
+            data={currChat}
+            closeContainer={() => {
+              setCurrChat(null);
+              setSelectedProject(null);
+            }}
+          />
         ) : (
           <div className="flex-1 bg-white shadow-lg rounded-lg p-6 flex items-center justify-center text-gray-600">
             <p>Select a project to view its chat</p>
