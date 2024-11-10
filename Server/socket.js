@@ -4,7 +4,7 @@ let io;
 exports.init = (httpServer) => {
   io = require("socket.io")(httpServer, {
     cors: {
-      origin: "http://localhost:5173", // Allow this origin
+      origin: `${process.env.CLIENT_URL}`, // Allow this origin
       methods: ["GET", "POST"],
       allowedHeaders: ["Content-Type"],
       credentials: true,
