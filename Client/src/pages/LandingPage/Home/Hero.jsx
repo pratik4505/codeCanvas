@@ -6,13 +6,16 @@ const Hero = () => {
   const navigate = useNavigate();
 
   const handleClick = () => {
-    navigate("/projects");
+    navigate("/searchride");
   };
 
   return (
     <div>
-      <section class="pt-12 bg-gray-50 sm:pt-16">
-    <div class="px-4 mx-auto max-w-7xl sm:px-6 lg:px-8">
+      <div className="hero__unique relative h-screen bg-cover bg-center">
+        <div className="hero-overlay__unique absolute inset-0 bg-white opacity-10"></div>
+        <div className="flex flex-col items-center justify-center h-full text-center">
+          <div className=" z-50 text-xl">
+          <div class="px-4 mx-auto max-w-7xl sm:px-6 lg:px-8">
         <div class="text-center">
             <p
                 class="max-w-4xl mx-auto mb-4 text-4xl font-bold leading-tight text-gray-900 sm:leading-tight sm:text-5xl lg:text-6xl lg:leading-tight">
@@ -34,16 +37,13 @@ const Hero = () => {
             </div>
         </div>
     </div>
-    <div class="bg-white">
-        <div class="relative mx-auto mt-4 md:mt-8">
-            <div class="lg:max-w-4xl lg:mx-auto">
-                <img class="px-4 md:mpx-8" src="https://images.unsplash.com/photo-1628277613967-6abca504d0ac" />
-            </div>
+          </div>
         </div>
-    </div>
-</section>
+      </div>
     </div>
   );
 };
 
 export default Hero;
+
+

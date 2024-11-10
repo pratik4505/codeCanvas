@@ -3,7 +3,6 @@ import { Navigate, useNavigate } from "react-router-dom";
 import { login } from "../../Api/authApi";
 import { Link } from "react-router-dom";
 
-import "./Login.scss";
 import { GlobalContext } from "../../Providers/GlobalProvider";
 
 export default function LoginPage() {
@@ -25,10 +24,8 @@ export default function LoginPage() {
   const handleLogin = async () => {
     setLoading(true);
     try {
-      console.log(formData);
       const response = await login(formData);
 
-      console.log(response);
       if (response.data) {
         localStorage.setItem("profile", JSON.stringify(response.data.data));
         initialLoad();

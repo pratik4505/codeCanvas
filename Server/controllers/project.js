@@ -27,6 +27,7 @@ const commit = async (req, res) => {
           commitId: savedCommit._id,
           commit: commitMessage,
           date: new Date(),
+          parentId:commitId,
         },
       },
     });
