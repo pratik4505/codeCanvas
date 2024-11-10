@@ -1,8 +1,9 @@
-import React from "react";
+import React, { useContext } from "react";
 import { useEditor } from "@craftjs/core";
 import { Panel, PanelSection } from "../utils/Panel";
 import CodeGenerator from "./CodeGenerator"; // Import the CodeGenerator component
-
+import { GlobalContext } from "../../Providers/GlobalProvider";
+import { useLocation } from "react-router-dom";
 export const RightPanel = () => {
   const { actions, selected, isEnabled } = useEditor((state, query) => {
     const currentNodeId = query.getEvent("selected").last();
@@ -25,7 +26,10 @@ export const RightPanel = () => {
       isEnabled: state.options.enabled,
     };
   });
-
+  const { socket } = useContext(GlobalContext);
+  const location = useLocation();
+  const que = new URLSearchParams(location.search);
+  const commitId = que.get("commitId");
   return (
     <Panel className="bg-white shadow-lg h-full w-[20%] flex flex-col">
       {/* AI Panel Section */}
@@ -47,6 +51,11 @@ export const RightPanel = () => {
                   <button
                     className="text-white bg-red-700 hover:bg-red-800 focus:ring-4 focus:ring-blue-300 font-medium rounded text-xs px-2 py-1"
                     onClick={() => {
+                      socket.emit("update", {
+                        nodeId: selected.id,
+                        action: "delete",
+                        room: commitId,
+                      });
                       actions.delete(selected.id);
                     }}
                   >

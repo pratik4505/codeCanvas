@@ -65,5 +65,9 @@ exports.runIO = (io) => {
     socket.on("disconnect", async () => {
       console.log("Client disconnected");
     });
+
+    socket.on("update", (data) => {
+      socket.to(data.room).emit("update", data);
+    });
   });
 };
