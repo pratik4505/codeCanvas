@@ -10,6 +10,7 @@ const commit = async (req, res) => {
 
   try {
     // Step 1: Create and save the new commit in your database
+    console.log("the commit is ",commit);
     const newCommit = new Commit({
       projectId,
       commit,
@@ -130,7 +131,7 @@ const pushToGitHub = async (req, res) => {
 const findJson = async (req, res) => {
   try {
     const { commitId } = req.params;
-    console.log(commitId);
+    console.log("the commit id for the commit is",commitId);
     const commit = await Commit.findById(commitId);
     if (!commit) {
       return res.status(404).json({ message: "Commit not found" });
@@ -436,6 +437,7 @@ const addPage = async (req, res) => {
         commitId: newCommit._id,
         commitMessage: "initial commit",
         date: new Date(),
+        parentId:newCommit._id
       },
     ]);
 
@@ -445,7 +447,8 @@ const addPage = async (req, res) => {
     res
       .status(201)
       .json({
-        name: pageName,
+        name:pageName,
+         commitId:newCommit._id,
         message: "Page created successfully with HTML and CSS files.",
       });
   } catch (error) {

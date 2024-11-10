@@ -64,6 +64,7 @@ export const deployProject = async (projectName) => {
 };
 
 const jsonToHtmlCss = (json) => {
+  console.log("the json i s",json)
   const parsedJson = JSON.parse(json);
   let html = "<!DOCTYPE html><html><head><link rel='stylesheet' href='styles.css'></head><body>";
   let css = "";
@@ -144,7 +145,7 @@ const jsonToHtmlCss = (json) => {
   html += rootHtml;
   css += rootCss;
   html += "</body></html>";
-
+  console.log("the html file generated for the editor is ",html)
   return { html };
 }
 
