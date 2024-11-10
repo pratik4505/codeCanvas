@@ -14,11 +14,10 @@ const commit = async (req, res) => {
       projectId,
       commit,
       page,
-      parentId:commitId,
-      message:commitMessage
+      parentId: commitId,
+      message: commitMessage,
     });
     const savedCommit = await newCommit.save();
-    console.log("New commit saved");
 
     // Step 2: Find the project and update the specific page with the new commit details
     await Project.findByIdAndUpdate(projectId, {
@@ -43,11 +42,8 @@ const commit = async (req, res) => {
 };
 
 const pushToGitHub = async (req, res) => {
-  console.log("I come here");
-
   // Destructure incoming request body
-  const { projectId, page, commitMessage, htmlContent} = req.body;
-  console.log(projectId);
+  const { projectId, page, commitMessage, htmlContent } = req.body;
 
   try {
     // Fetch project details from the database
@@ -63,20 +59,18 @@ const pushToGitHub = async (req, res) => {
       html: `${creatorId}/${name}/${page}.html`,
     };
 
-    console.log("Pushing updates to GitHub...");
-
     // GitHub API configuration
     const githubConfig = {
-      owner: 'vaibhavMNNIT',
-      repo: 'codecanvas',
-      branch: 'main', // specify the branch
+      owner: "vaibhavMNNIT",
+      repo: "codecanvas",
+      branch: "main", // specify the branch
       token: process.env.GITHUB_TOKEN, // GitHub personal access token
     };
 
     // Helper function to update files on GitHub
     const updateFileOnGitHub = async (path, content, message) => {
       const url = `https://api.github.com/repos/${githubConfig.owner}/${githubConfig.repo}/contents/${path}`;
-      const base64Content = Buffer.from(content).toString('base64');
+      const base64Content = Buffer.from(content).toString("base64");
       let payload = {
         message,
         content: base64Content,
@@ -108,10 +102,14 @@ const pushToGitHub = async (req, res) => {
 
     // Update both HTML and CSS files on GitHub
     await Promise.all([
-      updateFileOnGitHub(filePaths.html, htmlContent, `${commitMessage} - HTML update`),
+      updateFileOnGitHub(
+        filePaths.html,
+        htmlContent,
+        `${commitMessage} - HTML update`
+      ),
       // updateFileOnGitHub(filePaths.css, cssContent, `${commitMessage} - CSS update`),
     ]);
-    console.log("I come hre")
+    console.log("I come hre");
 
     // Send success response
     res.status(200).json({
@@ -120,34 +118,37 @@ const pushToGitHub = async (req, res) => {
   } catch (error) {
     console.error("Error in push process:", error);
     // Send failure response with the error message
-    res.status(500).json({ error: "Failed to push files to GitHub", details: error.message });
+    res
+      .status(500)
+      .json({
+        error: "Failed to push files to GitHub",
+        details: error.message,
+      });
   }
 };
 
-
-
-const findJson = async(req,res)=>{
+const findJson = async (req, res) => {
   try {
     const { commitId } = req.params;
     console.log(commitId);
     const commit = await Commit.findById(commitId);
     if (!commit) {
-      return res.status(404).json({ message: 'Commit not found' });
+      return res.status(404).json({ message: "Commit not found" });
     }
-    console.log(commit)
+    console.log(commit);
     res.json(commit);
   } catch (error) {
     console.error("Error fetching commit data:", error);
-    res.status(500).json({ message: 'Internal server error' });
+    res.status(500).json({ message: "Internal server error" });
   }
-}
+};
 
 const getLiveUrl = async (req, res) => {
   try {
     const { projectId } = req.params;
-    console.log(projectId)
+    console.log(projectId);
     const project = await Project.findById(projectId);
-    console.log(project)
+    console.log(project);
     if (!project) {
       return res.status(404).json({ message: "Project not found" });
     }
@@ -273,12 +274,11 @@ const createProject = async (req, res) => {
     const initialCommit = new Commit({
       projectId: newProject._id,
       commit: defaultCommitContent,
-      message:"Inital commit",
+      message: "Inital commit",
       page: "index",
     });
 
     await initialCommit.save();
-    console.log("i come hrer")
 
     // Step 5: Link the commit to the project pages
     newProject.pages.set("index", [
@@ -325,7 +325,9 @@ const addPage = async (req, res) => {
   const userId = req.userId;
 
   if (!projectId || !pageName) {
-    return res.status(400).json({ message: "Project ID and page name are required." });
+    return res
+      .status(400)
+      .json({ message: "Project ID and page name are required." });
   }
 
   try {
@@ -338,8 +340,15 @@ const addPage = async (req, res) => {
     const creatorId = project.creatorId;
 
     // Ensure that the user is a collaborator or the owner
-    if (!project.collaborators.has(userId) && project.creatorId.toString() !== userId) {
-      return res.status(403).json({ message: "You do not have permission to add pages to this project." });
+    if (
+      !project.collaborators.has(userId) &&
+      project.creatorId.toString() !== userId
+    ) {
+      return res
+        .status(403)
+        .json({
+          message: "You do not have permission to add pages to this project.",
+        });
     }
 
     // Check if the page name already exists
@@ -359,7 +368,9 @@ const addPage = async (req, res) => {
     const htmlContent = Buffer.from(
       `<!DOCTYPE html><html><head><title>${pageName}</title><link rel="stylesheet" href="${pageName}.css"></head><body><h1>${pageName}</h1></body></html>`
     ).toString("base64");
-    const cssContent = Buffer.from(`body { font-family: Arial, sans-serif; }`).toString("base64");
+    const cssContent = Buffer.from(
+      `body { font-family: Arial, sans-serif; }`
+    ).toString("base64");
 
     const headers = {
       Authorization: `Bearer ${process.env.GITHUB_TOKEN}`,
@@ -386,7 +397,7 @@ const addPage = async (req, res) => {
     // Check if the files exist and retrieve their SHAs if they do
     const htmlFileSha = await getFileSha(htmlFilePath);
     const cssFileSha = await getFileSha(cssFilePath);
-    console.log("icakdfa")
+    console.log("icakdfa");
     // Create or update HTML file in GitHub
     await axios.put(
       `https://api.github.com/repos/${repoOwner}/${repoName}/contents/${htmlFilePath}`,
@@ -414,11 +425,10 @@ const addPage = async (req, res) => {
       projectId: project._id,
       commit: defaultCommitContent,
       page: pageName,
-      message:"Initial commit"
+      message: "Initial commit",
     });
-    console.log("asdfas")
+
     await newCommit.save();
-    console.log("adfas")
 
     // Add the page to the project's pages map
     project.pages.set(pageName, [
@@ -432,7 +442,12 @@ const addPage = async (req, res) => {
     // Save the updated project
     await project.save();
 
-    res.status(201).json({ name: pageName, message: "Page created successfully with HTML and CSS files." });
+    res
+      .status(201)
+      .json({
+        name: pageName,
+        message: "Page created successfully with HTML and CSS files.",
+      });
   } catch (error) {
     if (error.response) {
       console.error("GitHub API Error:", error.response.data.message);
@@ -506,7 +521,7 @@ const deployProject = async (req, res) => {
     const url = `${name}.vercel.app`;
 
     // Ensure URL is a string
-    if (typeof url !== 'string') {
+    if (typeof url !== "string") {
       throw new Error("Deployment URL is not a valid string.");
     }
 
@@ -522,19 +537,17 @@ const deployProject = async (req, res) => {
       return res.status(404).json({ message: "Project not found" });
     }
 
-    console.log("Updated Project:", updatedProject);
-
     res.status(200).json({
       message: "Project deployed successfully",
       url: updatedProject.liveUrl, // Send back the updated URL
     });
   } catch (error) {
     console.error("Deployment error:", error.response?.data || error.message);
-    res.status(500).json({ message: "Deployment failed", error: error.message });
+    res
+      .status(500)
+      .json({ message: "Deployment failed", error: error.message });
   }
 };
-
-
 
 module.exports = {
   commit,
@@ -543,5 +556,8 @@ module.exports = {
   createProject,
   fetchCommit,
   addPage,
-  deployProject,getLiveUrl,pushToGitHub,findJson
+  deployProject,
+  getLiveUrl,
+  pushToGitHub,
+  findJson,
 };
