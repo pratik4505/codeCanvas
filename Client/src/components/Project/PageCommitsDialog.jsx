@@ -68,6 +68,3 @@ const PageCommitsDialog = ({ commits, creatorId, onClose, page, projectId, proje
 };
 
 export default PageCommitsDialog;
-
-
-

@@ -10,6 +10,7 @@ const commit = async (req, res) => {
 
   try {
     // Step 1: Create and save the new commit in your database
+    console.log("the commit is ",commit);
     const newCommit = new Commit({
       projectId,
       commit,
@@ -26,6 +27,7 @@ const commit = async (req, res) => {
           commitId: savedCommit._id,
           commit: commitMessage,
           date: new Date(),
+          parentId:commitId,
         },
       },
     });
@@ -130,7 +132,7 @@ const pushToGitHub = async (req, res) => {
 const findJson = async (req, res) => {
   try {
     const { commitId } = req.params;
-    console.log(commitId);
+    console.log("the commit id for the commit is",commitId);
     const commit = await Commit.findById(commitId);
     if (!commit) {
       return res.status(404).json({ message: "Commit not found" });
@@ -436,6 +438,7 @@ const addPage = async (req, res) => {
         commitId: newCommit._id,
         commitMessage: "initial commit",
         date: new Date(),
+        parentId:newCommit._id
       },
     ]);
 
@@ -445,7 +448,8 @@ const addPage = async (req, res) => {
     res
       .status(201)
       .json({
-        name: pageName,
+        name:pageName,
+         commitId:newCommit._id,
         message: "Page created successfully with HTML and CSS files.",
       });
   } catch (error) {
@@ -517,13 +521,8 @@ const deployProject = async (req, res) => {
 
   try {
     // Step 1: Deploy the project and get the live URL
-    const { url } = await deployProjectToVercel(
-      repoOwner,
-      repoName,
-      userFolderPath,
-      projectFolderPath,
-      projectName
-    );
+    const {name} = await deployProjectToVercel(repoOwner, repoName, userFolderPath, projectFolderPath, projectName);
+    const url = `${name}.vercel.app`;
 
     // Ensure URL is a string
     if (typeof url !== "string") {

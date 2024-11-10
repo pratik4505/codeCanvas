@@ -7,7 +7,7 @@ const ProjectSchema = new Schema({
   collaborators: {
     type: Map,
     of: String,
-  },
+  }, 
   creatorId: { type: Schema.Types.ObjectId, ref: "User", required: true }, // To store the project creator
   pages: {
     type: Map,
@@ -22,6 +22,10 @@ const ProjectSchema = new Schema({
           type: Date,
           default: Date.now,
         },
+        parentId:{
+          type:Schema.Types.ObjectId,
+          ref:"Commit",
+        }
       },
     ],
   },

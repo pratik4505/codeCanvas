@@ -18,15 +18,16 @@ const Project = ({ project, goBack }) => {
   const [selectedCommits, setSelectedCommits] = useState([]);
   const [showAddPageDialog, setShowAddPageDialog] = useState(false);
 
-  const openCommitsDialog = (pageName) => {
-    const commits = project.pages[pageName] || [];
-    console.log(commits)
-    setSelectedCommits(commits.sort((a, b) => new Date(b.date) - new Date(a.date)));
-    setShowCommitsDialog(pageName);
+  const openCommitsDialog = (pageData) => {
+    console.log(pageData)
+    const commits = pageData || [];
+    setSelectedCommits((prev) => [...commits].sort((a, b) => new Date(b.date) - new Date(a.date)));
+    //setSelectedCommits(commits);
+    //setShowCommitsDialog(pageData);
   };
 
   const handlePageAdded = (newPage) => {
-    project.pages[newPage.name] = [newPage.value];
+    project.pages[newPage.name] = [newPage];
   };
 
   return (
@@ -66,7 +67,7 @@ const Project = ({ project, goBack }) => {
             {Object.keys(project.pages).map((page) => (
               <li key={page}>
                 <button
-                  onClick={() => openCommitsDialog(page)}
+                  onClick={() => openCommitsDialog(project.pages[page])}
                   className="text-blue-600 hover:text-blue-800 hover:underline transition duration-300"
                 >
                   {page}
@@ -105,14 +106,14 @@ const Project = ({ project, goBack }) => {
       {showDialog && (
         <AddCollaborator setShowDialog={setShowDialog} project={project} />
       )}
-      {showCommitsDialog && (
+      {selectedCommits.length>0 && (
         <PageCommitsDialog
           commits={selectedCommits}
-          onClose={() => setShowCommitsDialog(false)}
+          onClose={() => setSelectedCommits([])}
           projectId={project._id}
           creatorId={project.creatorId}
           projectName={project.name}
-          page={showCommitsDialog}
+          page={selectedCommits}
         />
       )}
       {showAddPageDialog && (
