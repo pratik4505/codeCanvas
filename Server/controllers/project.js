@@ -502,8 +502,8 @@ const deployProject = async (req, res) => {
 
   try {
     // Step 1: Deploy the project and get the live URL
-    const { url } = await deployProjectToVercel(repoOwner, repoName, userFolderPath, projectFolderPath, projectName);
-    console.log("Deployment URL:", url);
+    const {name} = await deployProjectToVercel(repoOwner, repoName, userFolderPath, projectFolderPath, projectName);
+    const url = `${name}.vercel.app`;
 
     // Ensure URL is a string
     if (typeof url !== 'string') {

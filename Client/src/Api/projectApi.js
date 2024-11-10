@@ -159,7 +159,10 @@ export const handlePushClick = async (commitId) => {
     console.log(commitData)
     const {projectId,page} = commitData;
     // Convert the JSON to HTML and CSS
+    console.log(commitId)
+    console.log(commitData.commit)
     const { html } = jsonToHtmlCss(commitData.commit);
+    console.log(html)
     // Send the HTML and CSS to GitHub using axios (replaces fetch)
     const pushResponse = await API.post('/project/push', {
       projectId,
