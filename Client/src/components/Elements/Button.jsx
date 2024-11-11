@@ -1,10 +1,37 @@
 import { useNode, useEditor } from "@craftjs/core";
-import { Label } from "../utils/Label";
-import { TextInput } from "../utils/TextInput";
-import { useContext, useEffect, useState } from "react";
+import { useContext, useEffect } from "react";
 import { GlobalContext } from "../../Providers/GlobalProvider";
 import { useLocation } from "react-router-dom";
-export const Button = ({ text }) => {
+
+export const Button = ({
+  text,
+  color,
+  backgroundColor,
+  fontSize,
+  borderRadius,
+  padding,
+  bypass,
+}) => {
+  let jsx = (
+    <button
+      style={{
+        color: color,
+        backgroundColor: backgroundColor,
+        fontSize: fontSize,
+        borderRadius: borderRadius,
+        padding: padding,
+        textAlign: "center",
+        cursor: "pointer",
+        border: "none",
+      }}
+      ref={(ref) => connect(drag(ref))}
+    >
+      {text}
+    </button>
+  );
+
+  if (bypass) return jsx;
+
   const {
     connectors: { connect, drag },
     id,
@@ -14,7 +41,7 @@ export const Button = ({ text }) => {
     linkedNodes,
     actions,
   } = useNode((node) => ({
-    props: node.data?.props || {}, // Provide a default empty object
+    props: node.data?.props || {},
     parent: node.data?.parent,
     nodes: node.data?.nodes || [],
     linkedNodes: node.data?.linkedNodes || {},
@@ -28,15 +55,13 @@ export const Button = ({ text }) => {
   useEffect(() => {
     let nodeData = query.node(id).toSerializedNode();
 
-    // Ensure `myFlag` is initialized if undefined
     if (nodeData.custom.myFlag === "no") {
       actions.setCustom((custom) => {
         custom.myFlag = "yes";
       });
-      return; // Prevent further code execution until `myFlag` is set
+      return;
     }
 
-    // Emit only if myFlag has been set
     socket.emit("update", {
       nodeId: id,
       nodeData: nodeData,
@@ -44,39 +69,117 @@ export const Button = ({ text }) => {
       room: commitId,
     });
   }, [props, parent, nodes, linkedNodes, socket]);
-  return (
-    <button
-      className="text-white bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-2.5 mr-2 mb-2 dark:bg-blue-600 dark:hover:bg-blue-700 focus:outline-none dark:focus:ring-blue-800"
-      ref={(ref) => connect(drag(ref))}
-    >
-      {text}
-    </button>
-  );
+
+  return jsx;
 };
 
 const ButtonSettings = () => {
   const {
     actions: { setProp },
     text,
+    color,
+    backgroundColor,
+    fontSize,
+    borderRadius,
+    padding,
   } = useNode((node) => ({
     text: node.data.props.text,
+    color: node.data.props.color,
+    backgroundColor: node.data.props.backgroundColor,
+    fontSize: node.data.props.fontSize,
+    borderRadius: node.data.props.borderRadius,
+    padding: node.data.props.padding,
   }));
+
   return (
     <>
-      <Label label="Text">
-        <TextInput
+      <div>
+        <label className="block text-sm font-medium text-gray-700">Text</label>
+        <input
+          type="text"
           defaultValue={text}
           onChange={(e) => {
             setProp((props) => (props.text = e.target.value), 1000);
           }}
+          className="mt-1 p-2 border border-gray-300 rounded-md text-sm w-full"
         />
-      </Label>
+      </div>
+      <div className="mt-4">
+        <label className="block text-sm font-medium text-gray-700">
+          Text Color
+        </label>
+        <input
+          type="color"
+          defaultValue={color}
+          onChange={(e) => {
+            setProp((props) => (props.color = e.target.value), 1000);
+          }}
+          className="mt-1 p-2 border border-gray-300 rounded-md w-full"
+        />
+      </div>
+      <div className="mt-4">
+        <label className="block text-sm font-medium text-gray-700">
+          Background Color
+        </label>
+        <input
+          type="color"
+          defaultValue={backgroundColor}
+          onChange={(e) => {
+            setProp((props) => (props.backgroundColor = e.target.value), 1000);
+          }}
+          className="mt-1 p-2 border border-gray-300 rounded-md w-full"
+        />
+      </div>
+      <div className="mt-4">
+        <label className="block text-sm font-medium text-gray-700">
+          Font Size
+        </label>
+        <input
+          type="text"
+          defaultValue={fontSize}
+          onChange={(e) => {
+            setProp((props) => (props.fontSize = e.target.value), 1000);
+          }}
+          className="mt-1 p-2 border border-gray-300 rounded-md w-full"
+        />
+      </div>
+      <div className="mt-4">
+        <label className="block text-sm font-medium text-gray-700">
+          Border Radius
+        </label>
+        <input
+          type="text"
+          defaultValue={borderRadius}
+          onChange={(e) => {
+            setProp((props) => (props.borderRadius = e.target.value), 1000);
+          }}
+          className="mt-1 p-2 border border-gray-300 rounded-md w-full"
+        />
+      </div>
+      <div className="mt-4">
+        <label className="block text-sm font-medium text-gray-700">
+          Padding
+        </label>
+        <input
+          type="text"
+          defaultValue={padding}
+          onChange={(e) => {
+            setProp((props) => (props.padding = e.target.value), 1000);
+          }}
+          className="mt-1 p-2 border border-gray-300 rounded-md w-full"
+        />
+      </div>
     </>
   );
 };
 
 export const ButtonDefaultProps = {
   text: "New Button",
+  color: "#ffffff", // Default text color
+  backgroundColor: "#000000", // Default background color (black)
+  fontSize: "1rem", // Default font size
+  borderRadius: "0.375rem", // Default border radius
+  padding: "0.625rem 1.25rem", // Default padding
 };
 
 Button.craft = {

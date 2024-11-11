@@ -2,14 +2,71 @@ import React, { useState } from "react";
 import { useEditor } from "@craftjs/core";
 import { useLocation } from "react-router-dom";
 import { commit } from "../../Api/projectApi";
+// import { ConvertToHtml } from "./JsxToHtml";
 
+import { Button } from "../Elements/Button";
+import { Card } from "../Elements/Card";
+import { Container } from "../Elements/Container";
+
+import { renderToStaticMarkup } from "react-dom/server";
+
+const components = {
+  Container,
+  Button,
+  Card,
+};
+
+function ConvertToHtml(json) {
+  // Function to decode HTML entities
+  const decodeHtml = (html) => {
+    const txt = document.createElement("textarea");
+    txt.innerHTML = html;
+    return txt.value;
+  };
+
+  // Recursive function to generate HTML for nodes
+  const renderComponents = (node) => {
+    if (!node) return "";
+
+    const { resolvedName } = node.type;
+    const Component = components[resolvedName]; // Get the corresponding React component
+
+    // If component is not found, return empty string
+    if (!Component) return "";
+
+    // Get props for the component
+    const componentProps = { ...node.props };
+
+    // If the component has children nodes, recursively render them
+    if (node.nodes && node.nodes.length > 0) {
+      const childrenHtml = node.nodes
+        .map((childNodeId) => {
+          const childNode = json[childNodeId];
+          return renderComponents(childNode); // Recursively render children
+        })
+        .join("");
+      componentProps.children = childrenHtml; // Add children to component props
+    }
+
+    // Render the component to static HTML and return the result
+    const htmlOutput = renderToStaticMarkup(
+      <Component {...componentProps} bypass={true} />
+    );
+
+    // Decode HTML entities (like &quot;) to actual characters (like ")
+    return decodeHtml(htmlOutput);
+  };
+
+  // Start rendering from the ROOT node (entry point)
+  return renderComponents(json.ROOT);
+}
 const TopPanel = () => {
   const location = useLocation();
   const que = new URLSearchParams(location.search);
   const projectId = que.get("projectId");
   const projectName = que.get("projectName");
   const page = que.get("page");
-  const creatorId = que.get("creatorId")
+  const creatorId = que.get("creatorId");
   const commitId = que.get("commitId");
 
   const { actions, canUndo, canRedo, query } = useEditor((_, query) => ({
@@ -18,6 +75,12 @@ const TopPanel = () => {
   }));
 
   const [commitMessage, setCommitMessage] = useState("");
+
+  const convert = () => {
+    const json = query.serialize();
+
+    console.log(ConvertToHtml(JSON.parse(json)));
+  };
 
   const handleCommit = async () => {
     // Step 1: Serialize editor content
@@ -28,9 +91,9 @@ const TopPanel = () => {
       const response = await commit({
         projectId,
         page,
-        commit:editorJson,
+        commit: editorJson,
         commitMessage,
-        commitId
+        commitId,
       });
 
       if (!response.error) {
@@ -66,6 +129,12 @@ const TopPanel = () => {
           Redo
         </button>
       </div>
+      <button
+        className="bg-blue-500 text-white border border-blue-600 rounded px-2 py-1 hover:bg-blue-600"
+        onClick={convert}
+      >
+        JsxToHtml
+      </button>
       <div className="flex items-center space-x-2">
         <input
           type="text"
