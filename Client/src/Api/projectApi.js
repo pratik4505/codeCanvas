@@ -1,5 +1,6 @@
 import { ConvertToHtml } from "../components/Editor/TopPanel";
 import { API, handleApiError } from "./utils";
+import { toast } from "react-toastify";
 
 export const userProjects = async () => {
   try {
@@ -22,11 +23,11 @@ export const handleLivePreview = async (e, projectId) => {
       // Open the live URL in a new tab
       window.open(`https://${response.data.liveUrl}`, "_blank");
     } else {
-      alert("Live URL not found for this project.");
+      toast.success("Live URL not found for this project.");
     }
   } catch (error) {
     console.error("Error fetching live URL:", error);
-    alert("Failed to fetch live URL.");
+    toast.error("Failed to fetch live URL.");
   }
 };
 
@@ -37,7 +38,7 @@ export const deployProject = async (projectName) => {
   // Check if profile and userId exist
   if (!profile || !profile.userId) {
     console.error("User ID not found in localStorage");
-    alert("User is not logged in.");
+    toast.error("User is not logged in.");
     return null; // Return null if there's no user ID
   }
 
@@ -51,15 +52,15 @@ export const deployProject = async (projectName) => {
 
     // Check if the response has a URL in the expected structure
     if (response?.data?.url) {
-      alert("Website Deployed Successfully");
+      toast.success("Website Deployed Successfully");
       return response.data.url; // Return the live URL if it exists
     } else {
-      alert("Deployment failed: No URL returned.");
+      toast.error("Deployment failed: No URL returned.");
       return null;
     }
   } catch (error) {
     console.error("Deployment error:", error);
-    alert("Failed to deploy project.");
+    toast.error("Failed to deploy project.");
     return null;
   }
 };
@@ -91,13 +92,13 @@ export const handlePushClick = async (commitId) => {
     const pushResult = pushResponse.data; // Get the response data from the push request
 
     if (pushResult.message === "Files pushed to GitHub successfully") {
-      alert("Push to GitHub was successful!");
+      toast.success("Push to GitHub was successful!");
     } else {
-      alert("Failed to push to GitHub.");
+      toast.error("Failed to push to GitHub.");
     }
   } catch (error) {
     console.error("Error during push:", error);
-    alert("There was an error pushing the files to GitHub.");
+    toast.error("There was an error pushing the files to GitHub.");
   }
 };
 

@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 import { createProject, deployProject } from "../../Api/projectApi";
-
+import { toast } from "react-toastify";
 const CreateProject = ({ setShowDialog, setProjects }) => {
   const [projectName, setProjectName] = useState("");
   const [error, setError] = useState(null);
@@ -33,7 +33,7 @@ const CreateProject = ({ setShowDialog, setProjects }) => {
         return;
       }
 
-      console.log(deployResponse)
+      console.log(deployResponse);
       const liveUrl = deployResponse.url; // Assuming the deployed URL is in response.data.url
       console.log("Deployment URL:", liveUrl);
 
@@ -42,12 +42,12 @@ const CreateProject = ({ setShowDialog, setProjects }) => {
         ...newProject,
         liveUrl, // Add the live URL to the project data
       };
-      console.log(updatedProject)
+      console.log(updatedProject);
 
       // Step 4: Update project list and close the dialog
       setProjects((prevProjects) => [...prevProjects, updatedProject]);
       setShowDialog(false);
-
+      toast.success("Project created");
     } catch (err) {
       setError("Failed to create or deploy project. Please try again.");
     } finally {

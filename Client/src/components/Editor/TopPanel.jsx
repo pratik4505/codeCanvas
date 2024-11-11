@@ -6,7 +6,7 @@ import { Button } from "../Elements/Button";
 import { Card } from "../Elements/Card";
 import { Container } from "../Elements/Container";
 import { renderToStaticMarkup } from "react-dom/server";
-
+import { toast } from "react-toastify";
 const components = {
   Container,
   Button,
@@ -24,7 +24,7 @@ export const ConvertToHtml = (json) => {
     if (!node) return "";
 
     const { resolvedName } = node.type;
-    const Component = components[resolvedName]; 
+    const Component = components[resolvedName];
 
     if (!Component) return "";
 
@@ -67,7 +67,7 @@ export const ConvertToHtml = (json) => {
     </body>
     </html>
   `;
-}
+};
 
 const TopPanel = () => {
   const location = useLocation();
@@ -107,13 +107,13 @@ const TopPanel = () => {
       });
 
       if (!response.error) {
-        alert("Commit successful! Page updated on GitHub.");
+        toast.success("Commit successful! Page updated on GitHub.");
       } else {
-        alert("Commit failed!");
+        toast.error("Commit failed!");
       }
     } catch (error) {
       console.error("Error committing changes:", error);
-      alert("Failed to commit changes.");
+      toast.error("Failed to commit changes.");
     }
   };
 

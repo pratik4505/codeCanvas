@@ -1,16 +1,19 @@
 import React, { useState } from "react";
 import axios from "axios"; // Assuming you're using axios for API calls
 import { addPage } from "../../Api/projectApi";
-
+import { toast } from "react-toastify";
 const AddPageDialog = ({ setShowDialog, projectId, onPageAdded, project }) => {
   const [pageName, setPageName] = useState("");
   const [error, setError] = useState("");
   const projectName = project.name;
-  const handleSubmit = async () => {
-    console.log()
-    // Check if pageName is empty
+  const [loading, setLoading] = useState(false);
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    setLoading(true);
+
     if (!pageName) {
       setError("Page name is required.");
+      setLoading(false);
       return;
     }
 
@@ -25,7 +28,7 @@ const AddPageDialog = ({ setShowDialog, projectId, onPageAdded, project }) => {
       const response = await addPage({
         projectId,
         pageName,
-        projectName
+        projectName,
       });
       if (response.error) {
         setError("Failed to add page. Please try again.");
@@ -34,10 +37,12 @@ const AddPageDialog = ({ setShowDialog, projectId, onPageAdded, project }) => {
 
       // Call the onPageAdded function to update the parent component
       onPageAdded(response.data);
-
+      toast.success("Page added Successfully");
       // Close the dialog
       setShowDialog(false);
+      setLoading(false);
     } catch (err) {
+      setLoading(false);
       setError("Failed to add page. Please try again.");
       console.error("Error adding page:", err);
     }
@@ -60,9 +65,10 @@ const AddPageDialog = ({ setShowDialog, projectId, onPageAdded, project }) => {
         {error && <p className="text-red-500 mb-4">{error}</p>}
         <button
           onClick={handleSubmit}
+          disabled={loading}
           className="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600 transition"
         >
-          Add Page
+          {loading ? "Adding..." : "Add Page "}
         </button>
         <button
           onClick={() => setShowDialog(false)}

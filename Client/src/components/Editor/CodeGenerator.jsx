@@ -1,7 +1,7 @@
 import React, { useState } from "react";
 import { useEditor } from "@craftjs/core";
 import { handleAiGenerate } from "../../Api/aiApi";
-
+import { toast } from "react-toastify";
 const CodeGenerator = () => {
   const [prompt, setPrompt] = useState("");
   const [generatedCode, setGeneratedCode] = useState("");
@@ -26,8 +26,9 @@ const CodeGenerator = () => {
   // Function to handle code copy to clipboard
   const handleCopy = () => {
     if (generatedCode) {
-      navigator.clipboard.writeText(generatedCode)
-        .then(() => alert("Code copied to clipboard!"))
+      navigator.clipboard
+        .writeText(generatedCode)
+        .then(() => toast.success("Code copied to clipboard!"))
         .catch((err) => console.error("Failed to copy code: ", err));
     }
   };

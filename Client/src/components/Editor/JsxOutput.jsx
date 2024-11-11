@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
 import { useEditor } from "@craftjs/core";
 import { Panel } from "./Panel";
-
+import { toast } from "react-toastify";
 const __transformChildren = (children, getNode, level, formatted) => {
   const result = children.map((child) =>
     transformToJSX(getNode(child).get(), getNode, level + 1, formatted)
@@ -55,7 +55,10 @@ const __prettyOutput = (name, getNode, level, children, props) => {
           <br />
           {__transformChildren(children, getNode, level + 1, true).map(
             (child) => (
-              <span key={child}>{child}<br /></span>
+              <span key={child}>
+                {child}
+                <br />
+              </span>
             )
           )}
           {tabs}
@@ -119,7 +122,7 @@ export const JsxOutput = () => {
 
   const copyToClipboard = (content) => {
     navigator.clipboard.writeText(content).then(
-      () => alert("Copied to clipboard!"),
+      () => toast.success("Copied to clipboard!"),
       (err) => console.error("Could not copy text:", err)
     );
   };
@@ -153,7 +156,9 @@ export const JsxOutput = () => {
         <pre>{transformToJSX(rootNode, query.node, true, formatted)}</pre>
         <button
           onClick={() =>
-            copyToClipboard(transformToJSX(rootNode, query.node, true, formatted))
+            copyToClipboard(
+              transformToJSX(rootNode, query.node, true, formatted)
+            )
           }
           className="absolute top-2 right-2 px-2 py-1 text-xs bg-blue-500 text-white rounded shadow"
         >
