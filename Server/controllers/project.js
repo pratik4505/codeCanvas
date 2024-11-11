@@ -66,14 +66,14 @@ const commit = async (req, res) => {
 const pushToGitHub = async (req, res) => {
   // Destructure incoming request body
   const { projectId, page, commitMessage, htmlContent } = req.body;
-  console.log(req.body)
+  console.log(req.body);
   try {
     // Fetch project details from the database
     const project = await Project.findById(projectId.toString());
     if (!project) {
       return res.status(404).json({ error: "Project not found" });
     }
-    console.log(project)
+    console.log(project);
 
     const { creatorId, name } = project;
 
@@ -160,7 +160,7 @@ const findJson = async (req, res) => {
 
     // Check if commit.commit is a string before attempting to parse
     let commitData;
-    if (typeof commit.commit === 'string') {
+    if (typeof commit.commit === "string") {
       try {
         commitData = JSON.parse(commit.commit); // Parse the string if it's a valid JSON string
       } catch (error) {
@@ -170,14 +170,18 @@ const findJson = async (req, res) => {
       commitData = commit.commit; // If it's already an object, use it directly
     }
 
-    const ncommit = { ...commit.toObject(), commit: commitData }; // Use commit.toObject() to ensure you're working with a plain JavaScript object
+    const ncommit = { ...commit.toObject(), commit: commitData };
+    // Use commit.toObject() to ensure you're working with a plain JavaScript object
+    ncommit._id = ncommit._id.toString();
+    ncommit.projectId = ncommit.projectId.toString();
+
+    console.log(ncommit);
     res.json({ commit: ncommit });
   } catch (error) {
     console.error("Error fetching commit data:", error);
     res.status(500).json({ message: "Internal server error" });
   }
 };
-
 
 const getLiveUrl = async (req, res) => {
   try {
