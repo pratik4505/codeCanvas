@@ -7,7 +7,7 @@ import { deployProject } from "../Api/projectApi";
 
 const Project = ({ project, goBack }) => {
   const navigate = useNavigate();
-  console.log(project)
+  console.log(project);
 
   const goHome = () => {
     navigate("/");
@@ -18,12 +18,15 @@ const Project = ({ project, goBack }) => {
   const [selectedCommits, setSelectedCommits] = useState([]);
   const [showAddPageDialog, setShowAddPageDialog] = useState(false);
 
-  const openCommitsDialog = (pageData) => {
-    console.log(pageData)
+  const openCommitsDialog = (pageName) => {
+    const pageData = project.pages[pageName];
+    console.log(pageData);
     const commits = pageData || [];
-    setSelectedCommits((prev) => [...commits].sort((a, b) => new Date(b.date) - new Date(a.date)));
-    //setSelectedCommits(commits);
-    //setShowCommitsDialog(pageData);
+    setSelectedCommits((prev) =>
+      [...commits].sort((a, b) => new Date(b.date) - new Date(a.date))
+    );
+
+    setShowCommitsDialog(pageName);
   };
 
   const handlePageAdded = (newPage) => {
@@ -50,11 +53,15 @@ const Project = ({ project, goBack }) => {
         </div>
 
         {/* Project Name */}
-        <h2 className="text-2xl font-extrabold text-gray-800 mb-6">{project.name}</h2>
+        <h2 className="text-2xl font-extrabold text-gray-800 mb-6">
+          {project.name}
+        </h2>
 
         {/* Collaborators Section */}
         <div className="mt-6 bg-gray-100 p-4 rounded-lg shadow-md">
-          <h3 className="font-semibold text-lg text-gray-800">Collaborators:</h3>
+          <h3 className="font-semibold text-lg text-gray-800">
+            Collaborators:
+          </h3>
           <div className="text-gray-700 max-h-32 overflow-y-auto">
             {Object.values(project.collaborators).join(", ")}
           </div>
@@ -67,7 +74,7 @@ const Project = ({ project, goBack }) => {
             {Object.keys(project.pages).map((page) => (
               <li key={page}>
                 <button
-                  onClick={() => openCommitsDialog(project.pages[page])}
+                  onClick={() => openCommitsDialog(page)}
                   className="text-blue-600 hover:text-blue-800 hover:underline transition duration-300"
                 >
                   {page}
@@ -78,7 +85,12 @@ const Project = ({ project, goBack }) => {
         </div>
 
         {/* Add Buttons */}
-        <button onClick={() => deployProject(project.name)} className="bg-gradient-to-r from-yellow-400 to-yellow-600 text-white px-6 py-3 rounded-lg mt-6 w-full hover:from-yellow-500 hover:to-yellow-700 transition-all duration-300 transform hover:scale-105">Host My Website</button>
+        <button
+          onClick={() => deployProject(project.name)}
+          className="bg-gradient-to-r from-yellow-400 to-yellow-600 text-white px-6 py-3 rounded-lg mt-6 w-full hover:from-yellow-500 hover:to-yellow-700 transition-all duration-300 transform hover:scale-105"
+        >
+          Host My Website
+        </button>
 
         <button
           onClick={() => setShowAddPageDialog(true)}
@@ -106,14 +118,17 @@ const Project = ({ project, goBack }) => {
       {showDialog && (
         <AddCollaborator setShowDialog={setShowDialog} project={project} />
       )}
-      {selectedCommits.length>0 && (
+      {selectedCommits.length > 0 && showCommitsDialog && (
         <PageCommitsDialog
           commits={selectedCommits}
-          onClose={() => setSelectedCommits([])}
+          onClose={() => {
+            setSelectedCommits([]);
+            setShowCommitsDialog(null);
+          }}
           projectId={project._id}
           creatorId={project.creatorId}
           projectName={project.name}
-          page={selectedCommits}
+          page={showCommitsDialog}
         />
       )}
       {showAddPageDialog && (
@@ -128,8 +143,4 @@ const Project = ({ project, goBack }) => {
   );
 };
 
-
-
 export default Project;
-
-

@@ -78,12 +78,14 @@ export const handlePushClick = async (commitId) => {
     const htmlContent = ConvertToHtml(commitData.commit);
     //console.log(htmlContent); // Convert JSON to HTML
 
+    console.log(htmlContent);
+
     // Send the HTML content to GitHub using axios (replaces fetch)
     const pushResponse = await API.post("/project/push", {
       projectId,
       page,
       commitMessage: commitData.message,
-      htmlContent, // Pass the full HTML content here
+      htmlContent,
     });
 
     const pushResult = pushResponse.data; // Get the response data from the push request

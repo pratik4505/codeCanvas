@@ -40,17 +40,20 @@ const commit = async (req, res) => {
 
     const savedCommit = await newCommit.save();
 
-    // Step 2: Find the project and update the specific page with the new commit details
-    await Project.findByIdAndUpdate(projectId, {
-      $push: {
-        [`pages.${page}`]: {
-          commitId: savedCommit._id,
-          commit: commitMessage,
-          date: new Date(),
-          parentId: commitId,
+    await Project.findByIdAndUpdate(
+      projectId,
+      {
+        $push: {
+          [`pages.${page}`]: {
+            commitId: savedCommit._id,
+            commitMessage,
+            date: new Date(),
+            parentId: commitId,
+          },
         },
       },
-    });
+      { new: true, useFindAndModify: false } // Options to return updated document
+    );
 
     // Respond with success
     res.status(200).json({
@@ -315,6 +318,7 @@ const createProject = async (req, res) => {
       projectId: newProject._id,
       commit: defaultCommitContent,
       message: "Inital commit",
+      parentId: newProject._id,
       page: "index",
     });
 

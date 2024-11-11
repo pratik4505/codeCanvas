@@ -3,11 +3,16 @@ import { useNavigate } from "react-router-dom";
 import axios from "axios"; // Import axios
 import { handlePushClick } from "../../Api/projectApi";
 
-
-
-const PageCommitsDialog = ({ commits, creatorId, onClose, page, projectId, projectName }) => {
+const PageCommitsDialog = ({
+  commits,
+  creatorId,
+  onClose,
+  page,
+  projectId,
+  projectName,
+}) => {
   const navigate = useNavigate();
-
+  console.log(commits);
   // Function to handle commit click and navigate to Builder component
   const handleCommitClick = (commitId) => {
     navigate(
