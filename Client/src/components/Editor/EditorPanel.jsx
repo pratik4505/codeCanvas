@@ -4,12 +4,13 @@ import TopPanel from "./TopPanel";
 import { useLocation } from "react-router-dom";
 import { deployProject, fetchCommit } from "../../Api/projectApi";
 import { JsxOutput } from "./JsxOutput";
+import { Container } from "../Elements/Container";
 
 const EditorPanel = () => {
   const location = useLocation();
   const que = new URLSearchParams(location.search);
   const projectId = que.get("projectId");
-  const projectName = que.get("projectName")
+  const projectName = que.get("projectName");
   const commitId = que.get("commitId");
   const page = que.get("page");
   const { actions } = useEditor();
@@ -33,8 +34,6 @@ const EditorPanel = () => {
     }
   }, [commitId]);
 
-
-
   return (
     <div
       className="bg-white p-4 border-l border-r border-gray-300 flex flex-col h-full"
@@ -45,16 +44,7 @@ const EditorPanel = () => {
 
       {/* Scrollable Frame container */}
       <div className="flex-grow overflow-auto border border-gray-200 rounded-lg shadow-md">
-        <Frame>
-          <Element
-            is="div"
-            id="root"
-            canvas
-            className="w-full h-full min-h-screen bg-gray-50 p-4 rounded-lg"
-          >
-            {/* Content will load here */}
-          </Element>
-        </Frame>
+        <Frame />
       </div>
 
       {/* JSX Output */}

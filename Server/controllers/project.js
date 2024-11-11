@@ -3,14 +3,26 @@ const Project = require("../models/Project");
 const User = require("../models/User");
 const axios = require("axios");
 const Chat = require("../models/Chat");
-const defaultCommitContent = `{"ROOT":{"type":"div","isCanvas":true,"props":{"id":"root","className":"w-full h-full"},"displayName":"div","custom":{},"hidden":false,"nodes":[],"linkedNodes":{}}}`;
+const Save = require("../models/Save");
+const defaultCommitContent = `{
+  "ROOT": {
+    "type": { "resolvedName": "Container" },
+    "isCanvas": true,
+    "props": { "id": "root" },
+    "displayName": "Container",
+    "custom": { "myFlag": "no" },
+    "hidden": false,
+    "nodes": [],
+    "linkedNodes": {}
+  }
+}`;
 
 const commit = async (req, res) => {
   const { page, commit, projectId, commitMessage, commitId } = req.body;
 
   try {
     // Step 1: Create and save the new commit in your database
-    console.log("the commit is ",commit);
+    console.log("the commit is ", commit);
     const newCommit = new Commit({
       projectId,
       commit,
@@ -27,7 +39,7 @@ const commit = async (req, res) => {
           commitId: savedCommit._id,
           commit: commitMessage,
           date: new Date(),
-          parentId:commitId,
+          parentId: commitId,
         },
       },
     });
@@ -120,19 +132,17 @@ const pushToGitHub = async (req, res) => {
   } catch (error) {
     console.error("Error in push process:", error);
     // Send failure response with the error message
-    res
-      .status(500)
-      .json({
-        error: "Failed to push files to GitHub",
-        details: error.message,
-      });
+    res.status(500).json({
+      error: "Failed to push files to GitHub",
+      details: error.message,
+    });
   }
 };
 
 const findJson = async (req, res) => {
   try {
     const { commitId } = req.params;
-    console.log("the commit id for the commit is",commitId);
+    console.log("the commit id for the commit is", commitId);
     const commit = await Commit.findById(commitId);
     if (!commit) {
       return res.status(404).json({ message: "Commit not found" });
@@ -311,11 +321,36 @@ const createProject = async (req, res) => {
 
 const fetchCommit = async (req, res) => {
   try {
-    const commit = await Commit.findById(req.params.commitId);
+    const { commitId } = req.params;
+
+    // First, try to find the commit in the Save schema
+    let saveDoc = await Save.findOne({ commitId });
+
+    if (saveDoc) {
+      // If found in Save schema, return the commit from there
+      return res.status(200).json({ commit: saveDoc.commit });
+    }
+
+    // If not found in Save schema, look for it in the Commit schema
+    const commit = await Commit.findById(commitId);
+
     if (!commit) {
+      // If commit is not found in either schema, return 404
       return res.status(404).json({ message: "Commit not found" });
     }
-    res.status(200).json(commit);
+
+    // If found in Commit schema, create a new document in Save schema
+    saveDoc = new Save({
+      commitId: commit._id,
+      commit: commit.commit,
+      expiresAt: new Date(Date.now() + 60 * 60 * 1000), // Set expiration time to 1 hour from now
+    });
+
+    // Save the new document in the Save schema
+    await saveDoc.save();
+
+    // Return the commit from the Commit schema
+    res.status(200).json({ commit: commit.commit });
   } catch (error) {
     console.error("Error fetching commit:", error);
     res.status(500).json({ message: "Server error" });
@@ -346,11 +381,9 @@ const addPage = async (req, res) => {
       !project.collaborators.has(userId) &&
       project.creatorId.toString() !== userId
     ) {
-      return res
-        .status(403)
-        .json({
-          message: "You do not have permission to add pages to this project.",
-        });
+      return res.status(403).json({
+        message: "You do not have permission to add pages to this project.",
+      });
     }
 
     // Check if the page name already exists
@@ -438,20 +471,18 @@ const addPage = async (req, res) => {
         commitId: newCommit._id,
         commitMessage: "initial commit",
         date: new Date(),
-        parentId:newCommit._id
+        parentId: newCommit._id,
       },
     ]);
 
     // Save the updated project
     await project.save();
 
-    res
-      .status(201)
-      .json({
-        name:pageName,
-         commitId:newCommit._id,
-        message: "Page created successfully with HTML and CSS files.",
-      });
+    res.status(201).json({
+      name: pageName,
+      commitId: newCommit._id,
+      message: "Page created successfully with HTML and CSS files.",
+    });
   } catch (error) {
     if (error.response) {
       console.error("GitHub API Error:", error.response.data.message);
@@ -521,7 +552,13 @@ const deployProject = async (req, res) => {
 
   try {
     // Step 1: Deploy the project and get the live URL
-    const {name} = await deployProjectToVercel(repoOwner, repoName, userFolderPath, projectFolderPath, projectName);
+    const { name } = await deployProjectToVercel(
+      repoOwner,
+      repoName,
+      userFolderPath,
+      projectFolderPath,
+      projectName
+    );
     const url = `${name}.vercel.app`;
 
     // Ensure URL is a string

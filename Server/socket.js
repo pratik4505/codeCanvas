@@ -1,6 +1,6 @@
 const Chat = require("./models/Chat");
 let io;
-
+let updates = {};
 exports.init = (httpServer) => {
   io = require("socket.io")(httpServer, {
     cors: {
@@ -21,6 +21,10 @@ exports.getIO = () => {
     throw new Error("Socket.io not initialized!");
   }
   return io;
+};
+
+exports.getUpdates = () => {
+  return updates;
 };
 
 exports.runIO = (io) => {
@@ -67,7 +71,21 @@ exports.runIO = (io) => {
     });
 
     socket.on("update", (data) => {
-      socket.to(data.room).emit("update", data);
+      const { nodeId, nodeData, action, room } = data;
+
+      socket.to(room).emit("update", data);
+
+      if (!updates[room]) {
+        updates[room] = {};
+      }
+
+      if (action === "delete") {
+        if (updates[room][nodeId]) {
+          delete updates[room][nodeId];
+        }
+      } else {
+        updates[room][nodeId] = nodeData;
+      }
     });
   });
 };
