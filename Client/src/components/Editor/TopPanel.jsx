@@ -7,10 +7,12 @@ import { Card } from "../Elements/Card";
 import { Container } from "../Elements/Container";
 import { renderToStaticMarkup } from "react-dom/server";
 import { toast } from "react-toastify";
+import { Link } from "../Elements/Link";
 const components = {
   Container,
   Button,
   Card,
+  Link,
 };
 
 export const ConvertToHtml = (json) => {

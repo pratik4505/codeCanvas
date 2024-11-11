@@ -44,7 +44,7 @@ export const GlobalProvider = ({ children }) => {
   const signOut = () => {
     localStorage.removeItem("profile");
 
-    window.location.reload();
+    setUserData(null);
   };
 
   useEffect(() => {

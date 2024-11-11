@@ -1,7 +1,6 @@
 import React, { useState } from "react";
 import { useEditor, Element } from "@craftjs/core";
 import { Image, Button, Link, Container, Text } from "../Elements";
-import { Footer } from "../Premade/Footer";
 import { Card } from "../Elements/Card";
 
 const ToolboxButton = React.forwardRef(({ text }, ref) => (
@@ -60,6 +59,10 @@ const LeftPanel = () => {
         <ToolboxButton
           ref={(ref) => connectors.create(ref, <Card />)}
           text="Card"
+        />
+        <ToolboxButton
+          ref={(ref) => connectors.create(ref, <Link />)}
+          text="Link"
         />
       </CollapsibleSection>
     </div>
