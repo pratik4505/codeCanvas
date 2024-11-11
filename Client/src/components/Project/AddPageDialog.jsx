@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import axios from "axios"; // Assuming you're using axios for API calls
+import axios from "axios";
 import { addPage } from "../../Api/projectApi";
 import { toast } from "react-toastify";
 const AddPageDialog = ({ setShowDialog, projectId, onPageAdded, project }) => {
@@ -17,14 +17,12 @@ const AddPageDialog = ({ setShowDialog, projectId, onPageAdded, project }) => {
       return;
     }
 
-    // Check if the page name already exists
     if (project.pages.hasOwnProperty(pageName)) {
       setError("Page name already exists. Please choose a different name.");
       return;
     }
 
     try {
-      // Send request to backend to add the page
       const response = await addPage({
         projectId,
         pageName,
@@ -35,10 +33,9 @@ const AddPageDialog = ({ setShowDialog, projectId, onPageAdded, project }) => {
         return;
       }
 
-      // Call the onPageAdded function to update the parent component
       onPageAdded(response.data);
       toast.success("Page added Successfully");
-      // Close the dialog
+
       setShowDialog(false);
       setLoading(false);
     } catch (err) {
@@ -58,7 +55,7 @@ const AddPageDialog = ({ setShowDialog, projectId, onPageAdded, project }) => {
           value={pageName}
           onChange={(e) => {
             setPageName(e.target.value);
-            setError(""); // Clear error when user starts typing
+            setError("");
           }}
           className="border border-gray-300 p-2 rounded w-full mb-4"
         />

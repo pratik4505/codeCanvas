@@ -23,7 +23,6 @@ const Projects = () => {
   const [searchQuery, setSearchQuery] = useState("");
   const [currChat, setCurrChat] = useState(null);
 
-  // Fetch projects from backend
   useEffect(() => {
     const fetchProjects = async () => {
       try {
@@ -40,7 +39,6 @@ const Projects = () => {
     fetchProjects();
   }, []);
 
-  // Filter projects based on search query
   useEffect(() => {
     setFilteredProjects(
       projects.filter((project) =>
@@ -49,7 +47,6 @@ const Projects = () => {
     );
   }, [searchQuery, projects]);
 
-  // Loading or error state
   if (loading)
     return <div className="text-center p-4">Loading projects...</div>;
   if (error) return <div className="text-center text-red-400 p-4">{error}</div>;
@@ -133,15 +130,15 @@ const Projects = () => {
                 </div>
               </div>
               <div className="flex gap-2">
-              <button
-  onClick={(e) => {
-    e.stopPropagation();
-    handleLivePreview(e, project._id); // Make sure to pass project ID or other relevant data
-  }}
-  className="bg-gradient-to-r from-blue-500 to-blue-600 text-white px-3 py-1 rounded-lg shadow hover:from-blue-600 hover:to-blue-700 transition duration-300"
->
-  Live Preview
-</button>
+                <button
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    handleLivePreview(e, project._id);
+                  }}
+                  className="bg-gradient-to-r from-blue-500 to-blue-600 text-white px-3 py-1 rounded-lg shadow hover:from-blue-600 hover:to-blue-700 transition duration-300"
+                >
+                  Live Preview
+                </button>
 
                 <button
                   onClick={(e) => {

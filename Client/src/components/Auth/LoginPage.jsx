@@ -2,7 +2,7 @@ import React, { useState, useContext } from "react";
 import { Navigate, useNavigate } from "react-router-dom";
 import { login } from "../../Api/authApi";
 import { Link } from "react-router-dom";
-
+import { toast } from "react-toastify";
 import { GlobalContext } from "../../Providers/GlobalProvider";
 
 export default function LoginPage() {
@@ -32,11 +32,11 @@ export default function LoginPage() {
         navigate("/");
         return <Navigate to="/" />;
       } else {
-        setResponseMessage(response.data);
+        toast.error("An error occurred during login");
       }
     } catch (error) {
       console.error("Error during login:", error);
-      setResponseMessage("An error occurred during login.");
+      toast.error("An error occurred during login");
     } finally {
       setLoading(false);
     }
@@ -68,7 +68,11 @@ export default function LoginPage() {
             <label>Password</label>
           </div>
           <div className="flex justify-between">
-            <a className="cursor-pointer" style={{ cursor: "pointer" }} onClick={handleLogin}>
+            <a
+              className="cursor-pointer"
+              style={{ cursor: "pointer" }}
+              onClick={handleLogin}
+            >
               <span></span>
               <span></span>
               <span></span>
@@ -81,7 +85,11 @@ export default function LoginPage() {
                 )}
               </div>
             </a>
-            <a className="cursor-pointer" style={{ cursor: "pointer" }} onClick={() => navigate("/register")}>
+            <a
+              className="cursor-pointer"
+              style={{ cursor: "pointer" }}
+              onClick={() => navigate("/register")}
+            >
               <span></span>
               <span></span>
               <span></span>
@@ -96,7 +104,9 @@ export default function LoginPage() {
             </a>
           </div>
 
-          <Link to="/forgotPassword" style={{ cursor: "pointer" }}>Forgot Password</Link>
+          <Link to="/forgotPassword" style={{ cursor: "pointer" }}>
+            Forgot Password
+          </Link>
         </form>
       </div>
     </div>

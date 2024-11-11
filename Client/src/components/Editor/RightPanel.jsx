@@ -1,7 +1,7 @@
 import React, { useContext, useEffect, useState } from "react";
 import { useEditor } from "@craftjs/core";
 import { Panel, PanelSection } from "../utils/Panel";
-import CodeGenerator from "./CodeGenerator"; // Import the CodeGenerator component
+import CodeGenerator from "./CodeGenerator";
 import { GlobalContext } from "../../Providers/GlobalProvider";
 import { useLocation } from "react-router-dom";
 export const RightPanel = () => {

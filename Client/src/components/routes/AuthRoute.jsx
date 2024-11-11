@@ -2,18 +2,18 @@ import { Navigate } from "react-router-dom";
 
 import { Outlet } from "react-router-dom";
 
-const ProtectedRoute = () => {
+const AuthRoute = () => {
   const accessToken = JSON.parse(localStorage.getItem("profile"))?.accessToken;
 
-  return accessToken ? (
+  return accessToken === undefined ? (
     <div className="w-full h-full">
       <div>
         <Outlet />
       </div>
     </div>
   ) : (
-    <Navigate to="/login" />
+    <Navigate to="/" />
   );
 };
 
-export default ProtectedRoute;
+export default AuthRoute;

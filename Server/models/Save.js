@@ -19,13 +19,11 @@ const saveSchema = new mongoose.Schema(
   { timestamps: true }
 );
 
-// Middleware to update `expiresAt` on save or update
 saveSchema.pre("save", function (next) {
-  this.expiresAt = new Date(Date.now() + 60 * 60 * 1000); // Set expiration 1 hour from now
+  this.expiresAt = new Date(Date.now() + 60 * 60 * 1000);
   next();
 });
 
-// Create a TTL index on the `expiresAt` field
 saveSchema.index({ expiresAt: 1 }, { expireAfterSeconds: 0 });
 
 module.exports = mongoose.model("Save", saveSchema);

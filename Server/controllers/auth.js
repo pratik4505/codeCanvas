@@ -7,21 +7,15 @@ const nodemailer = require("nodemailer");
 const EmailModel = require("../models/EmailModel");
 
 function generateUniqueCode() {
-  // Get current timestamp in milliseconds
   const timestamp = new Date().getTime();
 
-  // Convert timestamp to string and remove milliseconds
   const timestampString = timestamp.toString().slice(0, -3);
 
-  // Extract last 6 digits from the timestamp string
   const lastSixDigits = timestampString.slice(-6);
 
-  // Ensure there are no leading zeros
   let uniqueCode = parseInt(lastSixDigits);
 
-  // Check if the unique code has leading zeros
   while (uniqueCode < 100000) {
-    // If so, multiply by 10 until it's a 6-digit number
     uniqueCode *= 10;
   }
 
@@ -60,23 +54,22 @@ const login = async (req, res, next) => {
       },
     });
   } catch (err) {
-    // Handle other errors
     console.error("Error during login:", err);
     res.status(500).json({ message: "Internal server error" });
   }
 };
 
 const createUserFolderOnGithub = async (userId) => {
-  const repoName = "codecanvas";
-  const owner = "vaibhavMNNIT";
-  const folderPath = `${userId}/placeholder.txt`; // GitHub requires a file, so we create an empty one
+  const repoName = process.env.CODE_BASE;
+  const owner = process.env.REPO_OWNER;
+  const folderPath = `${userId}/placeholder.txt`;
 
   try {
     const response = await axios.put(
       `https://api.github.com/repos/${owner}/${repoName}/contents/${folderPath}`,
       {
         message: "Initial commit for user folder",
-        content: Buffer.from("User folder initialization.").toString("base64"), // Encode content in base64
+        content: Buffer.from("User folder initialization.").toString("base64"),
       },
       {
         headers: {
@@ -90,11 +83,10 @@ const createUserFolderOnGithub = async (userId) => {
   }
 };
 
-const contactUs = async (req,res) => {
+const contactUs = async (req, res) => {
   try {
     const { name, email, contactNo, message } = req.body;
 
-   
     const transporter = nodemailer.createTransport({
       service: "gmail",
       host: "smtp.gmail.com",
@@ -116,13 +108,12 @@ const contactUs = async (req,res) => {
           Message: ${message}
         `,
     });
-    res.status(200).json({message:"Email sent successfully"});
+    res.status(200).json({ message: "Email sent successfully" });
   } catch (error) {
     console.error("Error sending email:", error);
     res.status(500).send("Failed to send email");
   }
 };
-
 
 const signUp = async (req, res, next) => {
   const errors = validationResult(req);
@@ -163,7 +154,6 @@ const signUp = async (req, res, next) => {
     const savedUser = await newUser.save();
     console.log("User created:", savedUser);
 
-    // Call GitHub folder creation function
     await createUserFolderOnGithub(savedUser._id);
 
     res.status(201).json({ message: "User created!", userId: savedUser._id });
@@ -179,7 +169,6 @@ const signUpOTP = async (req, res, next) => {
   const errors = validationResult(req);
   const verificationCode = generateUniqueCode();
   try {
-    // Check for validation errors
     if (!errors.isEmpty()) {
       return res.status(422).json({ errors: errors.array() });
     }
@@ -197,7 +186,7 @@ const signUpOTP = async (req, res, next) => {
 
     const info = transporter.sendMail({
       to: [email.toLowerCase()],
-      subject: "Email verification for carpooling website",
+      subject: "Email verification for codeCanvas website",
       text: `Your OTP is : ${verificationCode}`,
     });
 
@@ -211,7 +200,6 @@ const signUpOTP = async (req, res, next) => {
       .status(200)
       .json({ message: "OTP sent successfully", _id: emailModel._id });
   } catch (err) {
-    // Handle other errors
     console.error("Error during sign up:", err);
     res.status(500).json({ message: "Internal server error" });
   }
@@ -223,7 +211,6 @@ const forgotOTP = async (req, res, next) => {
   const errors = validationResult(req);
   const verificationCode = generateUniqueCode();
   try {
-    // Check for validation errors
     if (!errors.isEmpty()) {
       return res.status(422).json({ errors: errors.array() });
     }
@@ -241,7 +228,7 @@ const forgotOTP = async (req, res, next) => {
 
     const info = transporter.sendMail({
       to: [email.toLowerCase()],
-      subject: "Email verification for carpooling website",
+      subject: "Email verification for codeCanva website",
       text: `Your OTP is : ${verificationCode}`,
     });
 
@@ -255,7 +242,6 @@ const forgotOTP = async (req, res, next) => {
       .status(200)
       .json({ message: "OTP sent successfully", _id: emailModel._id });
   } catch (err) {
-    // Handle other errors
     console.error("Error during sign up:", err);
     res.status(500).json({ message: "Internal server error" });
   }
@@ -267,18 +253,15 @@ const changePassword = async (req, res) => {
   const { email, password, otp, otpId } = req.body;
 
   try {
-    // Check for validation errors
     if (!errors.isEmpty()) {
       return res.status(422).json({ errors: errors.array() });
     }
 
-    // Retrieve email verification model
     const emailModel = await EmailModel.findById(otpId);
     if (!emailModel) {
       return res.status(400).json({ message: "Invalid OTP" });
     }
 
-    // Compare email and OTP
     if (
       emailModel.email !== email.toLowerCase() ||
       emailModel.verificationCode !== otp
@@ -286,10 +269,9 @@ const changePassword = async (req, res) => {
       return res.status(400).json({ message: "Invalid OTP" });
     }
     await emailModel.deleteOne();
-    // Hash the password
+
     const hashedPassword = await bcrypt.hash(password, 10);
 
-    // Update the user's password
     const user = await User.findOneAndUpdate(
       { emailId: email.toLowerCase() },
       { password: hashedPassword }
@@ -311,5 +293,5 @@ module.exports = {
   signUpOTP,
   forgotOTP,
   changePassword,
-  contactUs
+  contactUs,
 };

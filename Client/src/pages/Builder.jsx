@@ -20,13 +20,10 @@ const Builder = () => {
     <Editor resolver={{ Container, Text, Button, Image, Footer, Card }}>
       <SyncProvider commitId={commitId}>
         <div className="h-screen flex">
-          {/* Left Panel */}
           <LeftPanel />
 
-          {/* Editor Panel */}
           <EditorPanel />
 
-          {/* Right Panel */}
           <RightPanel />
         </div>
       </SyncProvider>

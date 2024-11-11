@@ -24,7 +24,7 @@ const SyncProvider = ({ commitId, children }) => {
     try {
       const response = await fetchCommit(commitId);
       const commitData = response.data.commit;
-      //console.log(commitData);
+
       actions.deserialize(commitData);
     } catch (error) {
       console.error("Failed to load commit data:", error);
@@ -42,15 +42,13 @@ const SyncProvider = ({ commitId, children }) => {
         return;
       }
 
-      //console.log(nodeData);
       if (action === "delete") {
         actions.delete(nodeId);
       } else {
         let data = JSON.parse(query.serialize());
 
         data = { ...data, [nodeId]: nodeData };
-        console.log(nodeId, data);
-        let newData = {};
+
         Object.entries(data).forEach(([key, value]) => {
           data[key].custom = { myFlag: "no" };
         });

@@ -30,7 +30,9 @@ export default function ForgotPassword() {
       }
     } catch (error) {
       console.error("Error during password change:", error);
-      toast.error("An error occurred during password change. Please try again.");
+      toast.error(
+        "An error occurred during password change. Please try again."
+      );
     } finally {
       setLoading(false);
     }
@@ -42,7 +44,7 @@ export default function ForgotPassword() {
       if (!res.error) {
         setOtpId(res.data._id);
         toast.success("OTP sent successfully.");
-        setOtp(""); // Clear OTP field after sending OTP
+        setOtp("");
       } else {
         toast.error("Email address is not registered");
       }
@@ -87,7 +89,11 @@ export default function ForgotPassword() {
             />
             <label>Password</label>
           </div>
-          <a onClick={handleChangePassword} style={{ cursor: "pointer" }} disabled={loading}>
+          <a
+            onClick={handleChangePassword}
+            style={{ cursor: "pointer" }}
+            disabled={loading}
+          >
             <span></span>
             <span></span>
             <span></span>

@@ -42,10 +42,8 @@ export const GlobalProvider = ({ children }) => {
   }, [socket, listen]);
 
   const signOut = () => {
-    // Remove user profile from local storage
     localStorage.removeItem("profile");
 
-    // Reload the window to reflect sign-out
     window.location.reload();
   };
 

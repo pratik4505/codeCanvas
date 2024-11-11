@@ -20,7 +20,6 @@ export const handleLivePreview = async (e, projectId) => {
     const response = await API.get(`/project/${projectId}/liveUrl`);
     console.log(response);
     if (response.data && response.data.liveUrl) {
-      // Open the live URL in a new tab
       window.open(`https://${response.data.liveUrl}`, "_blank");
     } else {
       toast.success("Live URL not found for this project.");
@@ -32,14 +31,12 @@ export const handleLivePreview = async (e, projectId) => {
 };
 
 export const deployProject = async (projectName) => {
-  // Retrieve userId from localStorage
   const profile = JSON.parse(localStorage.getItem("profile"));
 
-  // Check if profile and userId exist
   if (!profile || !profile.userId) {
     console.error("User ID not found in localStorage");
     toast.error("User is not logged in.");
-    return null; // Return null if there's no user ID
+    return null;
   }
 
   const userId = profile.userId;
@@ -50,10 +47,9 @@ export const deployProject = async (projectName) => {
       projectName,
     });
 
-    // Check if the response has a URL in the expected structure
     if (response?.data?.url) {
       toast.success("Website Deployed Successfully");
-      return response.data.url; // Return the live URL if it exists
+      return response.data.url;
     } else {
       toast.error("Deployment failed: No URL returned.");
       return null;
@@ -65,23 +61,18 @@ export const deployProject = async (projectName) => {
   }
 };
 
-// Function to handle push logic for each commit
 export const handlePushClick = async (commitId) => {
   try {
     console.log(commitId);
-    // Fetch the commit data using axios (replaces fetch)
     const response = await API.get(`/project/commit/${commitId}`);
-    const commitData = response.data.commit; // Get the commit data from the response
+    const commitData = response.data.commit;
     const { projectId, page } = commitData;
     console.log("commit data", commitData);
 
-    // Convert the JSON to a complete HTML document
     const htmlContent = ConvertToHtml(commitData.commit);
-    //console.log(htmlContent); // Convert JSON to HTML
 
     console.log(htmlContent);
 
-    // Send the HTML content to GitHub using axios (replaces fetch)
     const pushResponse = await API.post("/project/push", {
       projectId,
       page,
@@ -89,7 +80,7 @@ export const handlePushClick = async (commitId) => {
       htmlContent,
     });
 
-    const pushResult = pushResponse.data; // Get the response data from the push request
+    const pushResult = pushResponse.data;
 
     if (pushResult.message === "Files pushed to GitHub successfully") {
       toast.success("Push to GitHub was successful!");

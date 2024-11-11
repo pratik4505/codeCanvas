@@ -13,7 +13,7 @@ const PageCommitsDialog = ({
 }) => {
   const navigate = useNavigate();
   console.log(commits);
-  // Function to handle commit click and navigate to Builder component
+
   const handleCommitClick = (commitId) => {
     navigate(
       `/builder?projectId=${projectId}&commitId=${commitId}&creatorId=${creatorId}&projectName=${projectName}&page=${page}`
@@ -47,14 +47,14 @@ const PageCommitsDialog = ({
                   <strong>Date:</strong>{" "}
                   {new Date(commit.date).toLocaleString()}
                 </p>
-                {/* Commit click to navigate */}
+
                 <button
                   onClick={() => handleCommitClick(commit.commitId)}
                   className="text-blue-600 hover:underline mt-2"
                 >
                   View in Builder
                 </button>
-                {/* Push button for this commit */}
+
                 <button
                   onClick={() => handlePushClick(commit.commitId)}
                   className="text-green-600 hover:underline mt-2 ml-2"

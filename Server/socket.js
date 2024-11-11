@@ -6,13 +6,13 @@ let updates = {};
 exports.init = (httpServer) => {
   io = require("socket.io")(httpServer, {
     cors: {
-      origin: `${process.env.CLIENT_URL}`, // Allow this origin
+      origin: `${process.env.CLIENT_URL}`,
       methods: ["GET", "POST"],
       allowedHeaders: ["Content-Type"],
       credentials: true,
     },
-    pingInterval: 1000 * 60, // 1 minute
-    pingTimeout: 1000 * 60 * 3, // 3 minutes
+    pingInterval: 1000 * 60,
+    pingTimeout: 1000 * 60 * 3,
   });
 
   return io;
@@ -94,21 +94,16 @@ exports.runIO = (io) => {
 
 // Run a task every minute
 cron.schedule("* * * * *", async () => {
-  // Loop through the updates object
   for (const [key, update] of Object.entries(updates)) {
     try {
-      // Find the corresponding Save document by commitId
       const saveDoc = await Save.findOne({ commitId: key });
 
       if (saveDoc) {
-        // Parse the existing commit and merge it with the new update
         const parsedCommit = JSON.parse(saveDoc.commit);
         const newCommit = JSON.stringify({ ...parsedCommit, ...update });
 
-        // Update the commit field with the merged commit
         saveDoc.commit = newCommit;
 
-        // Save the updated document
         await saveDoc.save();
         console.log(`Updated commit for commitId: ${key}`);
       } else {
@@ -119,6 +114,5 @@ cron.schedule("* * * * *", async () => {
     }
   }
 
-  // After all updates are processed, clear the updates object
   updates = {};
 });

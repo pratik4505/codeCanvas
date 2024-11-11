@@ -74,14 +74,18 @@ router.post(
 router.post(
   "/changePassword",
   [
-    body("password").trim().isLength({ min: 8 }),
-    // .withMessage("Password must be at least 8 characters long")
-    // .matches(/^(?=.*\d)(?=.*[a-z])(?=.*[A-Z])(?=.*[^a-zA-Z0-9]).{8,}$/)
-    // .withMessage("Password must contain at least one uppercase letter, one lowercase letter, one number, and one special character"),
+    body("password")
+      .trim()
+      .isLength({ min: 8 })
+      .withMessage("Password must be at least 8 characters long")
+      .matches(/^(?=.*\d)(?=.*[a-z])(?=.*[A-Z])(?=.*[^a-zA-Z0-9]).{8,}$/)
+      .withMessage(
+        "Password must contain at least one uppercase letter, one lowercase letter, one number, and one special character"
+      ),
   ],
   changePassword
 );
 
-router.post("/contactUs",verifyJWT, contactUs);
+router.post("/contactUs", verifyJWT, contactUs);
 
 module.exports = router;

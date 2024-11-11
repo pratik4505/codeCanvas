@@ -47,10 +47,8 @@ export const ConvertToHtml = (json) => {
     return decodeHtml(htmlOutput);
   };
 
-  // Start rendering from the ROOT node (entry point)
   const bodyContent = renderComponents(json.ROOT);
 
-  // Wrap the generated HTML in a full HTML structure
   return `
     <!DOCTYPE html>
     <html lang="en">
@@ -84,14 +82,14 @@ const TopPanel = () => {
   }));
 
   const [commitMessage, setCommitMessage] = useState("");
-  const [htmlOutput, setHtmlOutput] = useState(""); // State for the HTML output
-  const [isModalOpen, setIsModalOpen] = useState(false); // State to control modal visibility
+  const [htmlOutput, setHtmlOutput] = useState("");
+  const [isModalOpen, setIsModalOpen] = useState(false);
 
   const convert = () => {
     const json = query.serialize();
     const html = ConvertToHtml(JSON.parse(json));
-    setHtmlOutput(html); // Set the generated HTML to state
-    setIsModalOpen(true); // Open the modal
+    setHtmlOutput(html);
+    setIsModalOpen(true);
   };
 
   const handleCommit = async () => {
@@ -175,7 +173,7 @@ const TopPanel = () => {
             <div className="mt-4 flex justify-end">
               <button
                 className="bg-red-500 text-white rounded px-4 py-2"
-                onClick={() => setIsModalOpen(false)} // Close the modal
+                onClick={() => setIsModalOpen(false)}
               >
                 Close
               </button>

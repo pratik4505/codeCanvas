@@ -62,41 +62,6 @@ const LeftPanel = () => {
           text="Card"
         />
       </CollapsibleSection>
-
-      {/* Premade Components Section */}
-      <CollapsibleSection title="Premade Components">
-        <ToolboxButton
-          ref={(ref) => connectors.create(ref, <Footer text="New footer" />)}
-          text="Footer"
-        />
-        {/* Add other premade components here */}
-      </CollapsibleSection>
-
-      {/* Templates Section */}
-      <CollapsibleSection title="Templates">
-        <ToolboxButton
-          ref={(ref) => connectors.create(ref, <Container text="Template 1" />)}
-          text="Template 1"
-        />
-        <ToolboxButton
-          ref={(ref) => connectors.create(ref, <Container text="Template 2" />)}
-          text="Template 2"
-        />
-        {/* Add other templates here */}
-      </CollapsibleSection>
-
-      {/* Premade Websites Section */}
-      <CollapsibleSection title="Premade Websites">
-        <ToolboxButton
-          ref={(ref) => connectors.create(ref, <Container text="Website 1" />)}
-          text="Website 1"
-        />
-        <ToolboxButton
-          ref={(ref) => connectors.create(ref, <Container text="Website 2" />)}
-          text="Website 2"
-        />
-        {/* Add more premade websites here */}
-      </CollapsibleSection>
     </div>
   );
 };

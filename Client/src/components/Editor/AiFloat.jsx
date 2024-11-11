@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import CodeGenerator from "./CodeGenerator"; // Import the CodeGenerator component
+import CodeGenerator from "./CodeGenerator";
 
 export const FloatingButtonWithPopup = () => {
   const [isPopupVisible, setIsPopupVisible] = useState(false);

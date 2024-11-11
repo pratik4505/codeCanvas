@@ -24,10 +24,8 @@ const AddCollaborator = ({ setShowDialog, project }) => {
         return;
       }
 
-      // Assuming response.data contains the new collaborator's id and name
       const { id, name } = response.data;
 
-      // Update the collaborators in the project
       project.collaborators[id] = name;
 
       toast.success("Collaborator added successfully!");

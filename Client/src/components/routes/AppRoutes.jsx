@@ -8,21 +8,24 @@ import SignUp from "../Auth/SignUp";
 import Home from "../../pages/Home";
 import Projects from "../../pages/Projects";
 import Builder from "../../pages/Builder";
+import AuthRoute from "./AuthRoute";
 
 const AppRoutes = () => {
   return (
     <Routes>
-      <Route path="/login" element={<LoginPage />} />
-      <Route path="/forgotPassword" element={<ForgotPassword />} />
-      <Route path="*" element={<Error />} />
+      <Route path="/" element={<Home />} />
 
-      <Route path="/register" element={<SignUp />} />
+      <Route path="/" element={<AuthRoute />}>
+        <Route path="/login" element={<LoginPage />} />
+        <Route path="/forgotPassword" element={<ForgotPassword />} />
+        <Route path="/register" element={<SignUp />} />
+      </Route>
 
       <Route path="/" element={<ProtectedRoute />}>
-        <Route index element={<Home />} />
         <Route path="/projects" element={<Projects />} />
         <Route path="/builder" element={<Builder />} />
       </Route>
+      <Route path="*" element={<Error />} />
     </Routes>
   );
 };

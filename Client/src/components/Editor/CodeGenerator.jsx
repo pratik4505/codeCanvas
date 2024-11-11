@@ -7,23 +7,19 @@ const CodeGenerator = () => {
   const [generatedCode, setGeneratedCode] = useState("");
   const { actions } = useEditor();
 
-  // Function to handle the prompt submission
   const handleGenerate = async () => {
     try {
       const response = await handleAiGenerate({ prompt });
 
-      // Assuming the backend returns the generated code as 'response.data.text'
       const generatedComponentCode = response.data.text;
       setGeneratedCode(generatedComponentCode);
 
-      // Add the generated component to Craft.js canvas
       actions.addNode(generatedComponentCode);
     } catch (error) {
       console.error("Error generating code:", error);
     }
   };
 
-  // Function to handle code copy to clipboard
   const handleCopy = () => {
     if (generatedCode) {
       navigator.clipboard

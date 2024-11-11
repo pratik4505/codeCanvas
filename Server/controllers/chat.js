@@ -25,9 +25,7 @@ const getMessages = async (req, res) => {
 
     const messages = await Text.find({
       id: id,
-      //  createdAt: { $lt: createdAt },
-    }).sort({ createdAt: -1 }); // Sort in descending order based on createdAt
-    // .limit(limit);
+    }).sort({ createdAt: -1 });
 
     const revMessages = messages.reverse();
 
@@ -58,16 +56,12 @@ const createChat = async (req, res) => {
   const { userData, id } = req.body;
 
   try {
-    // Find the chat associated with the provided rideId
     let chat = await Chat.findOne({ id: id });
 
-    // Update the members of the existing chat
     chat.members.set(userData.userId, userData.name);
 
-    // Save the updated chat
     await chat.save();
 
-    // Send the updated chat as response
     res.status(200).json(chat);
   } catch (error) {
     console.error("Error updating chat:", error);

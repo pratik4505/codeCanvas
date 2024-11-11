@@ -7,8 +7,8 @@ const ProjectSchema = new Schema({
   collaborators: {
     type: Map,
     of: String,
-  }, 
-  creatorId: { type: Schema.Types.ObjectId, ref: "User", required: true }, // To store the project creator
+  },
+  creatorId: { type: Schema.Types.ObjectId, ref: "User", required: true },
   pages: {
     type: Map,
     of: [
@@ -22,16 +22,16 @@ const ProjectSchema = new Schema({
           type: Date,
           default: Date.now,
         },
-        parentId:{
-          type:Schema.Types.ObjectId,
-          ref:"Commit",
-        }
+        parentId: {
+          type: Schema.Types.ObjectId,
+          ref: "Commit",
+        },
       },
     ],
   },
   liveUrl: {
     type: String,
-    default: null, // Initially, there's no live URL until the project is deployed
+    default: null,
   },
 });
 
