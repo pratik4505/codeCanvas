@@ -1,4 +1,6 @@
+const cron = require("node-cron");
 const Chat = require("./models/Chat");
+const Save = require("./models/Save");
 let io;
 let updates = {};
 exports.init = (httpServer) => {
@@ -89,3 +91,34 @@ exports.runIO = (io) => {
     });
   });
 };
+
+// Run a task every minute
+cron.schedule("* * * * *", async () => {
+  // Loop through the updates object
+  for (const [key, update] of Object.entries(updates)) {
+    try {
+      // Find the corresponding Save document by commitId
+      const saveDoc = await Save.findOne({ commitId: key });
+
+      if (saveDoc) {
+        // Parse the existing commit and merge it with the new update
+        const parsedCommit = JSON.parse(saveDoc.commit);
+        const newCommit = JSON.stringify({ ...parsedCommit, ...update });
+
+        // Update the commit field with the merged commit
+        saveDoc.commit = newCommit;
+
+        // Save the updated document
+        await saveDoc.save();
+        console.log(`Updated commit for commitId: ${key}`);
+      } else {
+        console.log(`No Save document found for commitId: ${key}`);
+      }
+    } catch (error) {
+      console.error(`Error updating commit for commitId: ${key}`, error);
+    }
+  }
+
+  // After all updates are processed, clear the updates object
+  updates = {};
+});
