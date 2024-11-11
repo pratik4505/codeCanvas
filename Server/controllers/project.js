@@ -23,13 +23,21 @@ const commit = async (req, res) => {
   try {
     // Step 1: Create and save the new commit in your database
     console.log("the commit is ", commit);
+
+    const parseCommit = JSON.parse(commit);
+
+    Object.entries(parseCommit).forEach(([key, value]) => {
+      parseCommit[key].custom = { myFlag: "no" };
+    });
+
     const newCommit = new Commit({
       projectId,
-      commit,
+      commit: JSON.stringify(parseCommit),
       page,
       parentId: commitId,
       message: commitMessage,
     });
+
     const savedCommit = await newCommit.save();
 
     // Step 2: Find the project and update the specific page with the new commit details
@@ -327,8 +335,20 @@ const fetchCommit = async (req, res) => {
     let saveDoc = await Save.findOne({ commitId });
 
     if (saveDoc) {
-      // If found in Save schema, return the commit from there
-      return res.status(200).json({ commit: saveDoc.commit });
+      let updates = require("../socket").getUpdates();
+
+      let thisCommit = {};
+
+      if (updates[commitId]) {
+        thisCommit = updates[commitId];
+      }
+
+      const fetchCommit = JSON.parse(saveDoc.commit);
+
+      const finalCommit = { ...fetchCommit, ...thisCommit };
+      console.log(finalCommit);
+
+      return res.status(200).json({ commit: finalCommit });
     }
 
     // If not found in Save schema, look for it in the Commit schema
