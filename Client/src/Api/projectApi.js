@@ -1,3 +1,4 @@
+import { ConvertToHtml } from "../components/Editor/TopPanel";
 import { API, handleApiError } from "./utils";
 
 export const userProjects = async () => {
@@ -63,116 +64,33 @@ export const deployProject = async (projectName) => {
   }
 };
 
-const jsonToHtmlCss = (json) => {
-  console.log("the json i s",json)
-  const parsedJson = JSON.parse(json);
-  let html = "<!DOCTYPE html><html><head><link rel='stylesheet' href='styles.css'></head><body>";
-  let css = "";
-
-  const parseNode = (nodeId) => {
-    const node = parsedJson[nodeId];
-    if (!node) {
-      console.warn(`Node with ID ${nodeId} not found.`);
-      return { html: '', css: '' };
-    }
-
-    const { displayName, props = {}, nodes = [], linkedNodes = {} } = node;
-    let nodeHtml = "";
-    let nodeCss = "";
-
-    switch (displayName) {
-      case "div":
-        nodeHtml += `<div id="${props.id || ''}" class="${props.className || ''}">`;
-        break;
-      case "Text":
-        const fontSize = props.fontSize ? `font-size: ${props.fontSize}px;` : '';
-        nodeHtml += `<p style="${fontSize}">${props.text || ''}</p>`;
-        break;
-      case "Button":
-        nodeHtml += `<button class="${props.className || ''}" style="${props.style || ''}">${props.text || 'Button'}</button>`;
-        break;
-      case "Column":
-        nodeHtml += `<div class="w-full ${props.className || ''}">`;
-        break;
-      case "Columns":
-        nodeHtml += `<div class="flex flex-row ${props.className || ''}" style="gap: ${props.gap || 0}px;">`;
-        break;
-      case "Container":
-        nodeHtml += `<div class="${props.className || ''}" id="${props.id || ''}">`;
-        break;
-      case "Row":
-        nodeHtml += `<div class="flex flex-col ${props.className || ''}">`;
-        break;
-      case "Rows":
-        nodeHtml += `<div class="flex flex-col ${props.className || ''}" style="gap: ${props.gap || 0}px;">`;
-        break;
-      default:
-        console.warn(`Unhandled display name: ${displayName}`);
-    }
-
-    nodes.forEach((childId) => {
-      const { html: childHtml, css: childCss } = parseNode(childId);
-      nodeHtml += childHtml;
-      nodeCss += childCss;
-    });
-
-    Object.values(linkedNodes).forEach((linkedNodeId) => {
-      const { html: linkedHtml, css: linkedCss } = parseNode(linkedNodeId);
-      nodeHtml += linkedHtml;
-      nodeCss += linkedCss;
-    });
-
-    switch (displayName) {
-      case "div":
-      case "Column":
-      case "Columns":
-      case "Container":
-      case "Row":
-      case "Rows":
-        nodeHtml += `</div>`;
-        break;
-      case "Button":
-        nodeHtml += `</button>`;
-        break;
-    }
-
-    return { html: nodeHtml, css: nodeCss };
-  };
-
-  const rootNodeId = "ROOT";
-  const { html: rootHtml, css: rootCss } = parseNode(rootNodeId);
-
-  html += rootHtml;
-  css += rootCss;
-  html += "</body></html>";
-  console.log("the html file generated for the editor is ",html)
-  return { html };
-}
 
 
 
 // Function to handle push logic for each commit
 export const handlePushClick = async (commitId) => {
   try {
+    console.log(commitId)
     // Fetch the commit data using axios (replaces fetch)
     const response = await API.get(`/project/commit/${commitId}`);
     const commitData = response.data; // Get the commit data from the response
+    const { projectId, page } = commitData;
     console.log(commitData)
-    const {projectId,page} = commitData;
-    // Convert the JSON to HTML and CSS
-    console.log(commitId)
-    console.log(commitData.commit)
-    const { html } = jsonToHtmlCss(commitData.commit);
-    console.log(html)
-    // Send the HTML and CSS to GitHub using axios (replaces fetch)
+
+    // Convert the JSON to a complete HTML document
+    const htmlContent = ConvertToHtml(commitData.commit);
+    console.log(htmlContent) // Convert JSON to HTML
+
+    // Send the HTML content to GitHub using axios (replaces fetch)
     const pushResponse = await API.post('/project/push', {
       projectId,
       page,
       commitMessage: commitData.message,
-      htmlContent: html,
+      htmlContent, // Pass the full HTML content here
     });
 
     const pushResult = pushResponse.data; // Get the response data from the push request
+
     if (pushResult.message === "Files pushed to GitHub successfully") {
       alert("Push to GitHub was successful!");
     } else {
@@ -183,6 +101,7 @@ export const handlePushClick = async (commitId) => {
     alert("There was an error pushing the files to GitHub.");
   }
 };
+
 
 
 export const addCollaborator = async (data) => {
@@ -207,7 +126,7 @@ export const createProject = async (data) => {
 
 export const commit = async (data) => {
   try {
-    console.log(data)
+    console.log(data.commit)
     const res = await API.post("/project/commit", data);
     if (res.status === 200) return { error: null, data: res.data };
     else return { error: res.data.error, data: null };
