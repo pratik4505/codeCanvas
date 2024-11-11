@@ -1,7 +1,7 @@
-const { GoogleGenerativeAI } = require('@google/generative-ai');
-
-// Initialize GoogleGenerativeAI with API key
-const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY);
+const { OpenAI } = require('openai'); // Import OpenAI
+const openai = new OpenAI({
+  apiKey: process.env.OPENAI_API_KEY, // Ensure this is set in your environment variables
+});
 
 // Define the function to handle prompt generation
 const generateContent = async (req, res) => {
@@ -11,13 +11,20 @@ const generateContent = async (req, res) => {
   }
 
   try {
-    // Specify the Gemini model
-    const model = await genAI.getGenerativeModel({ model: 'gemini-1.5-flash' });
-    // Generate content based on the prompt
-    const result = await model.generateContent(prompt);
-    const response  = result.response.text();
-    // Send the generated content back as a response
-    res.json({ text: response });
+    // Send a request to OpenAI's Chat Completion endpoint
+    const response = await openai.chat.completions.create({
+      model: "gpt-4o-mini", // Use "gpt-4" or "gpt-3.5-turbo" based on your availability
+      messages: [
+        {
+          role: "user",
+          content: prompt, // Send the prompt directly from the request
+        },
+      ],
+    });
+
+    // Extract and send the generated content back as a response
+    const generatedText = response.choices[0].message.content;
+    res.json({ text: generatedText });
   } catch (error) {
     console.error('Error generating content:', error);
     res.status(500).json({ error: 'Failed to generate content' });
@@ -25,4 +32,3 @@ const generateContent = async (req, res) => {
 };
 
 module.exports = { generateContent };
-

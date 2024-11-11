@@ -5,6 +5,7 @@ import { useLocation } from "react-router-dom";
 import { deployProject, fetchCommit } from "../../Api/projectApi";
 import { JsxOutput } from "./JsxOutput";
 import { Container } from "../Elements/Container";
+import FloatingButtonWithPopup from "./AiFloat";
 
 const EditorPanel = () => {
   const location = useLocation();
@@ -15,29 +16,10 @@ const EditorPanel = () => {
   const page = que.get("page");
   const { actions } = useEditor();
 
-  useEffect(() => {
-    // Fetch the commit data when the component mounts
-    const fetch = async () => {
-      try {
-        const response = await fetchCommit(commitId);
-        const commitData = response.data.commit;
-
-        // Deserialize the JSON string into Craft.js editor state
-        actions.deserialize(commitData);
-      } catch (error) {
-        console.error("Failed to load commit data:", error);
-      }
-    };
-
-    if (commitId) {
-      fetch();
-    }
-  }, [commitId]);
-
   return (
     <div
       className="bg-white p-4 border-l border-r border-gray-300 flex flex-col h-full"
-      style={{ width: "60%" }}
+      style={{ width: "80%" }}
     >
       {/* Top Panel at the top */}
       <TopPanel className="flex-none border-b border-gray-200 mb-2 pb-2" />
@@ -48,7 +30,8 @@ const EditorPanel = () => {
       </div>
 
       {/* JSX Output */}
-      <JsxOutput className="mt-4" />
+      <FloatingButtonWithPopup/>
+
     </div>
   );
 };
