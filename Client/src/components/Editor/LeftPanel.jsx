@@ -2,6 +2,7 @@ import React, { useState } from "react";
 import { useEditor, Element } from "@craftjs/core";
 import { Image, Button, Link, Container, Text } from "../Elements";
 import { Footer } from "../Premade/Footer";
+import { Card } from "../Elements/Card";
 
 const ToolboxButton = React.forwardRef(({ text }, ref) => (
   <div
@@ -37,26 +38,28 @@ const LeftPanel = () => {
   const { connectors } = useEditor();
 
   return (
-    <div className="bg-gray-100 p-4 h-full overflow-y-auto" style={{ width: "20%" }}>
+    <div
+      className="bg-gray-100 p-4 h-full overflow-y-auto"
+      style={{ width: "20%" }}
+    >
       <h2 className="text-xl font-bold mb-4 text-center">Components</h2>
 
       {/* Basic Components Section */}
       <CollapsibleSection title="Basic Components">
         <ToolboxButton
-          ref={(ref) => connectors.create(ref, <Text text="New text" />)}
-          text="Text"
-        />
-        <ToolboxButton
           ref={(ref) => connectors.create(ref, <Button text="New button" />)}
           text="Button"
         />
+
         <ToolboxButton
-          ref={(ref) => connectors.create(ref, <Image />)}
-          text="Image"
+          ref={(ref) =>
+            connectors.create(ref, <Element is={Container} canvas />)
+          }
+          text="Container"
         />
         <ToolboxButton
-          ref={(ref) => connectors.create(ref, <Element is={Container} canvas />)}
-          text="Container"
+          ref={(ref) => connectors.create(ref, <Card />)}
+          text="Card"
         />
       </CollapsibleSection>
 

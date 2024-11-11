@@ -11,12 +11,13 @@ import { Button } from "../components/Elements/Button";
 import { Image } from "../components/Elements";
 import { Footer } from "../components/Premade/Footer";
 import SyncProvider from "../components/Editor/SyncProvider";
+import { Card } from "../components/Elements/Card";
 const Builder = () => {
   const location = useLocation();
   const que = new URLSearchParams(location.search);
   const commitId = que.get("commitId");
   return (
-    <Editor resolver={{ Container, Text, Button, Image, Footer }}>
+    <Editor resolver={{ Container, Text, Button, Image, Footer, Card }}>
       <SyncProvider commitId={commitId}>
         <div className="h-screen flex">
           {/* Left Panel */}
