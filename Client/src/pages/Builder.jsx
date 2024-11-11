@@ -4,7 +4,7 @@ import LeftPanel from "../components/Editor/LeftPanel";
 import EditorPanel from "../components/Editor/EditorPanel";
 import RightPanel from "../components/Editor/RightPanel";
 import { useLocation, useNavigate } from "react-router-dom";
-import { Text } from "../components/Elements/Text";
+
 import { Container } from "../components/Elements/Container";
 import { Button } from "../components/Elements/Button";
 import SyncProvider from "../components/Editor/SyncProvider";

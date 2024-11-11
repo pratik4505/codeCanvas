@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 import { useEditor, Element } from "@craftjs/core";
-import { Image, Button, Link, Container, Text } from "../Elements";
+import { Button, Link, Container } from "../Elements";
 import { Card } from "../Elements/Card";
 
 const ToolboxButton = React.forwardRef(({ text }, ref) => (
